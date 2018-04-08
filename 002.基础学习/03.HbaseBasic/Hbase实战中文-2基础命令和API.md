@@ -53,7 +53,7 @@ Hbase表的行有唯一标识符,叫做行键rowkey,其他部分用来存储HBas
 和数据操作有关的HBase API成为(command).有五个基本命令来访问HBase.`Get,Put,Delete,Scan,Increment`
 
 ```java
-Put p = nwe Put(Bytes.toBytes("MissingLee"))
+Put p =new Put(Bytes.toBytes("MissingLee"))
 //!!! Bytes.toBytes() 属于 org.apache.hadoop.hbase.util.Bytes
 // HBase中所有数据都是作为原始数据(raw data)使用字节数组的性质存储的,行键也是如此.Java中公用类Bytes用来转换各种Java数据类型
 // 注意此时Put实例还没有插入到表中,重视创建了对象
