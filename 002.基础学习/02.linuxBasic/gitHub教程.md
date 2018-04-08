@@ -17,3 +17,6 @@ https://blog.csdn.net/autfish/article/details/52513465
 在指定 貌似是 source root 目录的时候，可能回处先 java 和 main 两个目录，这时候要把 main这个去掉，不然项目拽下来运行回报错找不到类
 
 这里后面应该也能修改，但是我没注意其中细节的内容
+
+
+I want to know how to merge!!!
