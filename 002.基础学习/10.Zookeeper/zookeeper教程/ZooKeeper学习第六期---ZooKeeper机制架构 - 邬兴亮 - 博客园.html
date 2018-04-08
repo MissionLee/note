@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)http://www.cnblogs.com/wuxl360/p/5817550.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/bundle-ClearGertrude.css">
+<link id="mobile-style" media="only screen and (max-width: 768px)" type="text/css" rel="stylesheet" href="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/bundle-ClearGertrude-mobile.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/wuxl360/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/wuxl360/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/wuxl360/wlwmanifest.xml">
+<script async="" src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/analytics.js.下载"></script><script type="text/javascript" src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/encoder.js.下载"></script><script src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/jquery.js.下载" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'wuxl360', cb_enable_mathjax=false;var isLogined=false;</script>
+<script src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/blog-common.js.下载" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<div id="header">
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/wuxl360/">邬兴亮</a></h1>
+<p id="tagline"></p></div>
+<div id="main">
+	
+<div id="post_detail">
+	<div class="post">
+		<h2>
+			<a id="cb_post_title_url" href="http://www.cnblogs.com/wuxl360/p/5817550.html">ZooKeeper学习第六期---ZooKeeper机制架构</a>
+		</h2>
+		<div class="postText"><div id="cnblogs_post_body"><h2>一、ZooKeeper权限管理机制　</h2>
+<h3>1.1 权限管理ACL(Access Control List)　</h3>
+<p><a name="OLE_LINK1"></a>ZooKeeper 的权限管理亦即ACL 控制功能，使用ACL来对Znode进行访问控制。ACL的实现和Unix文件访问许可非常相似：它使用许可位来对一个节点的不同操作进行允许或禁止的权 限控制。但是和标准的Unix许可不同的是，Zookeeper对于用户类别的区分，不止局限于所有者(owner)、组 (group)、所有人(world)三个级别。Zookeeper中，数据节点没有"所有者"的概念。访问者利用id标识自己的身份，并获得与之相应的 不同的访问权限。</p>
+<p>ZooKeeper 的权限管理通过Server、Client 两端协调完成：</p>
+<p><strong>(1) Server端 </strong></p>
+<p>一个ZooKeeper 的节点存储两部分内容：<strong>数据</strong>和<strong>状态</strong>，状态中包含ACL 信息。创建一个znode 会产生一个ACL 列表，列表中每个ACL 包括：</p>
+<p style="margin-left: 24pt;"><strong>①</strong> 权限perms</p>
+<p style="margin-left: 24pt;"><strong>②</strong> 验证模式scheme</p>
+<p style="margin-left: 24pt;"><strong>③</strong> 具体内容expression：Ids</p>
+<p>例如，当scheme="digest" 时， Ids 为用户名密码， 即"root ：J0sTy9BCUKubtK1y8pkbL7qoxSw"。ZooKeeper 提供了如下几种验证模式：</p>
+<p style="margin-left: 24pt;"><strong>① Digest</strong>： Client 端由<span style="color: blue;">用户名和<span style="color: blue;">密码验证，譬如<span style="color: blue;">user:pwd </span></span></span></p>
+<p style="margin-left: 24pt;"><strong>② Host</strong>： Client 端由<span style="color: blue;">主机名验证，譬如<span style="color: blue;">localhost</span></span></p>
+<p style="margin-left: 24pt;"><strong>③ Ip</strong>：Client 端由<span style="color: blue;">IP 地址验证，譬如<span style="color: blue;">172.2.0.0/24</span></span></p>
+<p style="margin-left: 24pt;"><strong>④ World</strong> ：固定用户为<span style="color: blue;">anyone，为所有Client 端<span style="color: blue;">开放权限 </span></span></p>
+<p>当会话建立的时候，客户端将会进行自我验证。</p>
+<p style="text-align: justify;">权限许可集合如下：</p>
+<p style="text-align: justify; margin-left: 24pt;"><strong>① Create </strong>允许对<span style="color: blue;">子节点Create 操作</span></p>
+<p style="text-align: justify; margin-left: 24pt;"><strong>②</strong> <strong>Read </strong>允许对<span style="color: blue;">本节点GetChildren 和GetData 操作</span></p>
+<p style="text-align: justify; margin-left: 24pt;"><strong>③</strong> <strong>Write</strong> 允许对<span style="color: blue;">本节点SetData 操作</span></p>
+<p style="text-align: justify; margin-left: 24pt;"><strong>④</strong> <strong>Delete </strong>允许对<span style="color: blue;">子节点Delete 操作</span></p>
+<p style="text-align: justify; margin-left: 24pt;"><strong>⑤</strong> <strong>Admin</strong> 允许对<span style="color: blue;">本节点setAcl 操作</span></p>
+<p>另外，ZooKeeper Java API支持<strong>三种标准的用户权限</strong>，它们分别为：</p>
+<p style="margin-left: 24pt;"><span style="color: black;"><strong>①</strong><span style="color: purple;"> ZOO_PEN_ACL_UNSAFE：对于所有的ACL来说都是完全开放的，<span style="color: red;">任何应用程序可以在节点上执行<span style="color: blue;">任何操作，比如创建、列出并删除子节点。<br><span style="color: black;"><strong>②</strong><span style="color: purple;"> ZOO_READ_ACL_UNSAFE：对于任意的应用程序来说，<span style="color: blue;">仅仅具有读权限。<br><span style="color: black;"><strong>③</strong><span style="color: purple;"> ZOO_CREATOR_ALL_ACL：授予节点<span style="color: red;">创建者<span style="color: blue;">所有权限。需要注意的是，设置此权限之前，创建者必须已经通了服务器的认证。
+	</span></span></span></span></span></span></span></span></span></span></span></p>
+<p>Znode ACL 权限用一个int 型数字perms 表示，perms 的5 个二进制位分别表示set<span style="color: red;"><strong>a</strong>cl、<span style="color: red;"><strong>d</strong>elete、<span style="color: red;"><strong>c</strong>reate、<span style="color: red;"><strong>w</strong>rite、<span style="color: red;"><strong>r</strong>ead。比如<span style="color: red;">adcwr=0x1f，<span style="color: red;">----r=0x1，<span style="color: red;">a-c-r=0x15。
+</span></span></span></span></span></span></span></span></p>
+<h4>注意的是，exists操作和getAcl操作并不受ACL许可控制，因此任何客户端可以查询节点的状态和节点的ACL。
+</h4>
+<p style="text-align: justify;"><strong>(2) 客户端
+</strong></p>
+<p style="text-align: justify;">Client 通过调用addAuthInfo()函数设置当前会话的Author信息<strong>（</strong>针对<span style="color: red;">Digest 验证模式<strong>）</strong>。Server 收到Client 发送的操作请求<strong>（</strong>除<span style="color: red;">exists、<span style="color: red;">getAcl 之外<strong>）</strong>，需要进行<strong>ACL 验证</strong>：对该请求携带的Author 明文信息加密，并与目标节点的ACL 信息进行比较，如果匹配则具有相应的权限，否则请求被Server 拒绝。
+</span></span></span></p>
+<p>下面演示一个通过digest(用户名：密码的方式)为创建的节点设置ACL的例子，代码如下：
+</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    import org.apache.Zookeeper.*<span style="color: #000000;">;
+    import org.apache.Zookeeper.server.auth.DigestAuthenticationProvider;
+    import org.apache.Zookeeper.data.</span>*<span style="color: #000000;">;
+    import java.util.</span>*<span style="color: #000000;">;
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> NewDigest {
+        </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> main(String[] args) throws Exception {<span style="color: #008000;">//</span><span style="color: #008000;">new一个acl</span>
+            List&lt;ACL&gt; acls = <span style="color: #0000ff;">new</span> ArrayList&lt;ACL&gt;<span style="color: #000000;">();
+    　　　　　</span><span style="color: #008000;">//</span><span style="color: #008000;">添加第一个id，采用用户名密码形式</span>
+            Id id1 = <span style="color: #0000ff;">new</span> Id(<span style="color: #800000;">"</span><span style="color: #800000;">digest</span><span style="color: #800000;">"</span>,DigestAuthenticationProvider.generateDigest(<span style="color: #800000;">"</span><span style="color: #800000;">admin:admin</span><span style="color: #800000;">"</span><span style="color: #000000;">));
+            ACL acl1 </span>= <span style="color: #0000ff;">new</span><span style="color: #000000;"> ACL(ZooDefs.Perms.ALL, id1);
+            acls.add(acl1);
+    　　　　 </span><span style="color: #008000;">//</span><span style="color: #008000;">添加第二个id，所有用户可读权限</span>
+            Id id2 = <span style="color: #0000ff;">new</span> Id(<span style="color: #800000;">"</span><span style="color: #800000;">world</span><span style="color: #800000;">"</span>, <span style="color: #800000;">"</span><span style="color: #800000;">anyone</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            ACL acl2 </span>= <span style="color: #0000ff;">new</span><span style="color: #000000;"> ACL(ZooDefs.Perms.READ, id2);
+            acls.add(acl2);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;"> Zk用admin认证，创建/test ZNode。</span>
+    　　　　　ZooKeeper Zk = <span style="color: #0000ff;">new</span> ZooKeeper(<span style="color: #800000;">"</span><span style="color: #800000;">host1:2181,host2:2181,host3:2181</span><span style="color: #800000;">"</span>,<span style="color: #800080;">2000</span>, <span style="color: #0000ff;">null</span><span style="color: #000000;">);
+    　　　　　Zk.addAuthInfo(</span><span style="color: #800000;">"</span><span style="color: #800000;">digest</span><span style="color: #800000;">"</span>, <span style="color: #800000;">"</span><span style="color: #800000;">admin:admin</span><span style="color: #800000;">"</span><span style="color: #000000;">.getBytes());
+    　　　　　Zk.create(</span><span style="color: #800000;">"</span><span style="color: #800000;">/test</span><span style="color: #800000;">"</span>, <span style="color: #800000;">"</span><span style="color: #800000;">data</span><span style="color: #800000;">"</span><span style="color: #000000;">.getBytes(), acls, CreateMode.PERSISTENT);
+       }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<h3>1.2 ZooKeeper SuperDigest</h3>
+<p><strong>(1)</strong> 一次Client 对Znode 进行操作的验证ACL 的方式为：</p>
+<p><strong>a) 遍历znode的所有ACL： </strong></p>
+<p style="margin-left: 24pt;"><strong>①</strong> 对于每一个ACL，首先<span style="color: blue;">操作类型与<span style="color: blue;">权限（perms）匹配 </span></span></p>
+<p style="margin-left: 24pt;"><strong>② </strong>只有<span style="color: blue;">匹配权限成功才进行session 的<span style="color: blue;">auth 信息与ACL 的<span style="color: blue;">用户名、密码匹配 </span></span></span></p>
+<p><strong>b) </strong>如果两次匹配都成功，则允许操作；否则，返回权限不够error（rc=-102）</p>
+<p><strong>(2) </strong>如果Znode ACL List 中任何一个ACL 都没有setAcl 权限，那么就算superDigest 也修改不了它的权限；再假如这个Znode 还不开放delete 权限，那么它的所有子节点都将不会被删除。唯一的办法是通过手动删除snapshot 和log 的方法，将ZK 回滚到一个以前的状态，然后重启，当然这会影响到该znode 以外其它节点的正常应用。</p>
+<p><strong>(3)</strong> superDigest 设置的步骤：</p>
+<p style="margin-left: 24pt;"><strong>① </strong>启动ZK 的时候( zkServer.sh ) ， 加入参数： Java"-Dzookeeper .DigestAuthenticationProvider.superDigest=super:D/InIHSb7yEEbrWz8b9l71RjZJU=" （无空格）。</p>
+<p style="margin-left: 24pt;"><strong>②</strong> 在客户端使用的时候， addAuthInfo("digest", "super:test", 10, 0, 0); " super:test" 为"super:D/InIHSb7yEEbrWz8b9l71RjZJU="的明文表示，加密算法同setAcl。</p>
+<h2>二、 Watch机制</h2>
+<p>Zookeeper客户端在数据节点上设置监视，则当数据节点发生变化时，客户端会收到提醒。ZooKeeper中的各种读请求，如getDate()，getChildren()，和exists()，都可以选择加"监视点"(watch)。"监视点"指的是一种<strong>一次性的触发器</strong>(trigger)，当受监视的数据发生变化时，该触发器会通知客户端。</p>
+<p><strong>(1) 监视机制有三个关键点： </strong></p>
+<p style="margin-left: 24pt;"><strong>① </strong> "监视点"是<span style="color: blue;">一次性的，当触发过一次之后，除非重新设置，新的数据变化不会提醒客户端。 </span></p>
+<p style="margin-left: 24pt;"><strong>② </strong> "监视点"将数据改变的通知客户端。如果数据改变是<strong>客户端A引起</strong>的，不能保证"监视点"通知事件会在<span style="color: red;">引发数据修改的函数返回前<strong>到达客户端A</strong>。 </span></p>
+<p style="margin-left: 24pt;"><strong>③</strong> 对于"监视点"，ZooKeeper有如下保证：客户端一定是在接收到<span style="color: blue;">"监视"事件（watch event）之后才接收到<span style="color: blue;">数据的改变信息。 </span></span></p>
+<p><strong>(2)</strong> "<strong>监视点</strong>"<span style="color: red;">保留在ZooKeeper<span style="color: blue;">服务器上，则当客户端<span>连接到新的ZooKeeper服务器上时，所有需要被触发的相关"监视点"都会被触发。当客户端<span>断线后重连，与它的相关的"监视点"都会自动<span style="color: blue;">重新注册，这对客户端来说是透明的。在以下情况，"监视点"会<span style="color: red;">被错过：客户端B设置了关于节点A存在性的"监视点"，但B断线了，在B断线过程中节点A被创建又被删除。此时，B再连线后不知道A节点曾经被创建过。 </span></span></span></span></span></span></p>
+<p><strong>(3)</strong> ZooKeeper的"监视"机制保证以下几点：</p>
+<p style="margin-left: 24pt;"><strong>①</strong> "监视"事件的<span style="color: blue;">触发顺序和事件的<span style="color: blue;">分发顺序一致。 </span></span></p>
+<p style="margin-left: 24pt;"><strong>②</strong> 客户端将先接收到"监视"事件，然后才收到新的数据</p>
+<p style="margin-left: 24pt;"><strong>③</strong> "监视"事件<span style="color: blue;">触发的顺序与ZooKeeper服务器上<span style="color: blue;">数据变化的顺序一致 </span></span></p>
+<p><strong>(4) </strong>关于ZooKeeper"监视"机制的注意点：</p>
+<p style="margin-left: 24pt;"><strong>①</strong> "监视点"是一次性的。</p>
+<p style="margin-left: 24pt;"><strong>② </strong>由于"监视点"是一次性的，而且，从接收到"监视"事件到设置新"监视点"是有延时的，所以客户端可能监控不到数据的所有变化。</p>
+<p style="margin-left: 24pt;"><strong>③</strong> 一个监控对象，只会被相关的通知触发一次。如果一个客户端设置了关于某个数据点exists和getData的监控，则当该数据被删除的时候，只会触发"文件被删除"的</p>
+<p style="margin-left: 24pt;">通知。</p>
+<p style="margin-left: 24pt;"><strong>④ </strong>当客户端断开与服务器的连接时，客户端不再能收到"监视"事件，直到重新获得连接。所以关于Session的信息将被发送给所有ZooKeeper服务器。由于当连接断开时收不到"监视"，所以在这种情况下，模块行为需要容错方面的设计。</p>
+<h2>三、Session机制</h2>
+<h3>3.1 会话概述</h3>
+<p>每个ZooKeeper客户端的配置中都包括集合体中服务器的列表。在启动时，客户端会尝试连接到列表中的一台服务器。如果连接失败，它会尝试连接另一台服务器，以此类推，直到成功与一台服务器建立连接或因为所有ZooKeeper服务器都不可用而失败。</p>
+<p style="text-align: center;"><span style="font-family: 黑体;"><strong>图 3.1 ZooKeeper体系结构 </strong></span></p>
+<p style="text-align: center;"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/302149592314604.png" alt=""></p>
+<p>一旦客户端与一台ZooKeeper服务器建立连接，这台服务器就会为该客户端创建一个新的会话。每个会话都会有一个<span style="color: blue;">超时的时间设置，这个设置<span style="color: red;">由创建会话的应用<span style="color: blue;">来设定。如果服务器在超时时间段内没有收到任何请求，则相应的会话会过期。一旦一个<span style="color: red;">会话已经过期，就<span style="color: blue;">无法重新打开，并且任何与该会话相关联的<span style="color: blue;">短暂znode都会丢失。会话通常长期存在，而且会话过期是一种比较罕见的事件，但对应用来说，如何处理会话过期仍是非常重要的。</span></span></span></span></span></span></p>
+<p>只要一个会话空闲超过一定时间，都可以通过客户端发送ping请求（也称为心跳）保持会话不过期。ping请求由ZooKeeper的<span style="color: blue;">客户端库自动发送，因此在我们的代码中不需要考虑如何维护会话。这个时间长度的设置应当足够低，以便能档检测出服务器故障（由读超时体现），并且能够在会话超时的时间段内重新莲接到另外一台服务器。 </span></p>
+<h3>3.2 故障切换</h3>
+<p>ZooKeeper客户端可以自动地进行故障切换，切换至另一台ZooKeeper服务器。<strong>并且关键的一点是</strong>，在另一台服务器接替故障服务器之后，所有的会话和相关的短暂Znode仍然是有效的。<strong>在故障切换过程中</strong>，应用程序将收到<span style="color: blue;">断开连接和<span style="color: blue;">连接至服务的<span style="color: red;">通知。当<strong>客户端断开连接时</strong>，观察通知将无法发送；但是当客户端成功恢复连接后，这些延迟的通知会被发送。当然，在客户端重新连接至另一台服务器的过程中，如果应用程序试图执行一个操作，这个操作将会失败。这充分体现了在真实的ZooKeeper应用中处理连接丢失异常的重要性。 </span></span></span></p>
+<h2>四、ZooKeeper实例状态</h2>
+<p><strong>(1) ZooKeeper状态 </strong></p>
+<p>ZooKeeper对象在其生命周期中会经历几种不同的状态。你可以在任何时刻通过<span style="color: #7030a0;">getState()方法来<span style="color: red;">查询对象的状态： </span></span></p>
+<p style="margin-left: 24pt;">public<span style="color: blue;"> States<span style="color: #7030a0;"> getState() </span></span></p>
+<p><span style="color: blue;">States被定义成代表ZooKeeper对象不同状态的<span style="color: blue;">枚举类型值（不管是什么枚举值，一个ZooKeeper的实例在一个时刻只能处于一种状态）。在试图与ZooKeeper服务<strong>建立连接的过程中</strong>，一个新建的ZooKeeper实例处于<span style="color: blue;">CONNECTING状态。一旦<strong>建立连接</strong>，它就会进入<span style="color: blue;">CONNECTED状态。&nbsp; </span></span></span></span></p>
+<p style="text-align: center;"><span style="font-family: 黑体;"><strong>图 3.2 ZooKeeper状态转换 </strong></span></p>
+<p style="text-align: center;"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/302149598569245.png" alt=""></p>
+<p>通过<span>注册观察对象，使用了ZooKeeper对象的客户端可以收到<span style="color: red;">状态转换通知。在进入CONNECTED状态时，观察对象会收到一个WatchedEvent通知，其中KeeperState的值是SyncConnected。 </span></span></p>
+<p><strong>(2) Watch与ZooKeeper状态</strong></p>
+<p>ZooKeeper的观察对象肩负着双重责任：</p>
+<p style="margin-left: 24pt;"><strong>①</strong> 可以用来获得<span style="color: red;">ZooKeeper状态变化的相关通知； </span></p>
+<p style="margin-left: 24pt;"><strong>②</strong> 可以用来获得<span style="color: red;">Znode变化的相关通知。 </span></p>
+<p>监视<strong>ZooKeeper状态变化</strong>：可以使用ZooKeeper对象<span style="color: blue;">默认构造函数的观察。 </span></p>
+<p>监视<strong>Znode变化：</strong>可以使用一个<span style="color: blue;">专用的观察对象，将其传递给适当的读操作。也可以通过读操作中的布尔标识来设定是否共享使用默认的观察。 </span></p>
+<p>ZooKeeper实例可能失去或重新连接ZooKeeper服务，在CONNECTED和CONNECTING状态中切换。如果连接断 开，watcher得到一个Disconnected事件。学要注意的是，这些状态的迁移是由ZooKeeper实例自己发起的，如果连接断开他将自动尝 试自动连接。</p>
+<p>如果任何一个close()方法被调用，或是会话由Expired类型的KeepState提示过期时，ZooKeeper可能会转变成第三种状态 CLOSED。一旦处于CLOSED状态，ZooKeeper对象将不再是活动的了(可以使用states的isActive()方法进行测试)，而且不 能被重用。客户端必须建立一个新的ZooKeeper实例才能重新连接到ZooKeeper服务。</p>
+<blockquote>
+<p>如果，您认为阅读这篇博客让您有些收获，不妨点击一下右下角的【推荐】。<br>如果，您希望更容易地发现我的新博客，不妨点击一下左下角的【关注我】。<br>如果，您对我的博客所讲述的内容有兴趣，请继续关注我的后续博客，我是【<a href="http://www.cnblogs.com/sunddenly/" target="_blank">Sunddenly</a>】。</p>
+<p>本文版权归作者和博客园共有，欢迎转载，但未经作者同意必须保留此段声明，且在文章页面明显位置给出原文连接，否则保留追究法律责任的权利。</p>
+
+
+</blockquote></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/wuxl360/category/874409.html" target="_blank">Zookeeper </a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(5817550,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;1246c5cd-5308-e611-9fc1-ac853d9f53cc&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/wuxl360/" target="_blank"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/wuxl360/">邬兴亮</a><br>
+            <a href="http://home.cnblogs.com/u/wuxl360/followees">关注 - 17</a><br>
+            <a href="http://home.cnblogs.com/u/wuxl360/followers">粉丝 - 104</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;1246c5cd-5308-e611-9fc1-ac853d9f53cc&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(5817550,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">3</span>
+    </div>
+    <div class="buryit" onclick="votePost(5817550,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/wuxl360/p/5817549.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/wuxl360/p/5817549.html" title="发布于2016-08-29 12:09">ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据</a><br><a href="http://www.cnblogs.com/wuxl360/p/5817646.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/wuxl360/p/5817646.html" title="发布于2016-08-29 13:28">ZooKeeper学习第七期--ZooKeeper一致性原理</a><br></div>
+</div>
+
+</div>
+		<p class="postfoot">
+			posted on <span id="post-date">2016-08-29 12:10</span> <a href="http://www.cnblogs.com/wuxl360/">邬兴亮</a> 阅读(<span id="post_view_count">3165</span>) 评论(<span id="post_comment_count">0</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=5817550" rel="nofollow">编辑</a> <a href="http://www.cnblogs.com/wuxl360/p/5817550.html#" onclick="AddToWz(5817550);return false;">收藏</a>
+		</p>
+	</div>
+	<script type="text/javascript">var allowComments=true,cb_blogId=281376,cb_entryId=5817550,cb_blogApp=currentBlogApp,cb_blogUserGuid='1246c5cd-5308-e611-9fc1-ac853d9f53cc',cb_entryCreatedDate='2016/8/29 12:10:00';loadViewCount(cb_entryId);</script>
+	
+	</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/wuxl360/p/5817550.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/wuxl360/p/5817550.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://cloud.tencent.com/act/campus?fromSource=gwzcw.537249.537249.537249" target="_blank">【活动】腾讯云 【云+校园】套餐全新升级</a><br><a href="http://www.gcpowertools.com.cn/products/activereports_overview.htm?utm_source=cnblogs&amp;utm_medium=blogpage&amp;utm_term=bottom&amp;utm_content=AR&amp;utm_campaign=community" target="_blank">【推荐】报表开发有捷径：快速设计轻松集成，数据可视化和交互</a><br></div>
+<div id="opt_under_post"></div>
+<div id="cnblogs_c1" class="c_ad_block"><a href="http://activity.huaweicloud.com/devcloud1024/?utm_source=cnblogs&amp;utm_medium=MediaB&amp;utm_campaign=%E5%8D%8E%E4%B8%BA%E4%BA%91-10%E6%9C%88%E5%B9%BF%E5%91%8A%E6%8A%95%E6%94%BE&amp;utm_content=%E5%8D%9A%E5%AE%A2%E5%9B%AD%E5%86%85%E9%A1%B5C1%E7%9F%A9%E5%BD%A2&amp;utm_term=%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E4%BA%91-1024%E8%AE%BA%E5%9D%9B%E6%B4%BB%E5%8A%A8" target="_blank"><img width="300" height="250" src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/24442-20171015214114324-1153647777.jpg" alt="华为云1016C2"></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/580731/" target="_blank">你以为月入五万的硅谷程序猿想过得像月入五千？那还不是被逼的</a><br> ·  <a href="http://news.cnblogs.com/n/580730/" target="_blank">思科即将收购电信软件公司BroadSoft 价格约20亿美元</a><br> ·  <a href="http://news.cnblogs.com/n/580729/" target="_blank">阅文集团今日在香港IPO，募集资金最多达11亿美元</a><br> ·  <a href="http://news.cnblogs.com/n/580728/" target="_blank">趣店抱大腿成700亿市值土豪 校园贷擦边球还打吗？</a><br> ·  <a href="http://news.cnblogs.com/n/580727/" target="_blank">安卓之父的全面屏Essential Phone降价促销：4000元</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="cnblogs_c2" class="c_ad_block"><a href="http://click.aliyun.com/m/22446/" target="_blank"><img width="468" height="60" src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/24442-20171001085719794-417760373.jpg" alt="阿里云1001"></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/579480/" target="_blank">实用VPC虚拟私有云设计原则</a><br> ·  <a href="http://kb.cnblogs.com/page/576251/" target="_blank">如何阅读计算机科学类的书</a><br> ·  <a href="http://kb.cnblogs.com/page/578103/" target="_blank">Google 及其云智慧</a><br> ·  <a href="http://kb.cnblogs.com/page/575829/" target="_blank">做到这一点，你也可以成为优秀的程序员</a><br> ·  <a href="http://kb.cnblogs.com/page/566880/" target="_blank">写给立志做码农的大学生</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+</div>
+<div id="rightmenu">
+	
+		
+<h3>导航</h3>
+<ul>
+<li><a id="blog_nav_sitehome" href="http://www.cnblogs.com/">博客园</a></li>
+<li><a id="blog_nav_myhome" href="http://www.cnblogs.com/wuxl360/">首页</a></li>
+<li><a id="blog_nav_newpost" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+<li><a id="blog_nav_contact" accesskey="9" rel="nofollow" href="https://msg.cnblogs.com/send/%E9%82%AC%E5%85%B4%E4%BA%AE">联系</a></li>
+<li><a id="blog_nav_rss" href="http://www.cnblogs.com/wuxl360/rss">订阅</a><a id="blog_nav_rss_image" href="http://www.cnblogs.com/wuxl360/rss"><img src="./ZooKeeper学习第六期---ZooKeeper机制架构 - 邬兴亮 - 博客园_files/xml.gif" alt="订阅"></a></li>
+<li><a id="blog_nav_admin" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+</ul>
+		
+<h3>公告</h3>
+<div class="newsItem">
+	<div id="blog-news"><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/wuxl360/">邬兴亮</a><br>园龄：<a href="http://home.cnblogs.com/u/wuxl360/" title="入园时间：2016-04-22">1年6个月</a><br>粉丝：<a href="http://home.cnblogs.com/u/wuxl360/followers/">104</a><br>关注：<a href="http://home.cnblogs.com/u/wuxl360/followees/">17</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;1246c5cd-5308-e611-9fc1-ac853d9f53cc&#39;)">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>					
+		<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2017/09/01&#39;);return false;">&lt;</a></td><td align="center">2017年10月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2017/11/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">24</td><td class="CalOtherMonthDay" align="center">25</td><td class="CalOtherMonthDay" align="center">26</td><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td></tr><tr><td class="CalWeekendDay" align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td><td class="CalWeekendDay" align="center">7</td></tr><tr><td class="CalWeekendDay" align="center">8</td><td align="center">9</td><td align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td class="CalWeekendDay" align="center">14</td></tr><tr><td class="CalWeekendDay" align="center">15</td><td align="center">16</td><td align="center">17</td><td align="center">18</td><td align="center">19</td><td align="center">20</td><td class="CalWeekendDay" align="center">21</td></tr><tr><td class="CalWeekendDay" align="center">22</td><td class="CalTodayDay" align="center">23</td><td align="center">24</td><td align="center">25</td><td align="center">26</td><td align="center">27</td><td class="CalWeekendDay" align="center">28</td></tr><tr><td class="CalWeekendDay" align="center">29</td><td align="center">30</td><td align="center">31</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+		<div id="blog_stats">
+<h3>统计</h3>
+<ul>
+	<li>随笔 - 309</li>
+	<li>文章 - 1</li>
+	<li>评论 - 38</li>
+	<li>引用 - 0</li>
+ </ul></div>
+		<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/wuxl360/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="http://www.cnblogs.com/wuxl360/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="http://www.cnblogs.com/wuxl360/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="http://www.cnblogs.com/wuxl360/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="http://www.cnblogs.com/wuxl360/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_toptags" class="sidebar-block">
+<h3 class="catListTitle">我的标签</h3>
+<div id="MyTag">
+<ul>
+<li><a href="http://www.cnblogs.com/wuxl360/tag/C%23/">C#</a>(1)</li><li><a href="http://www.cnblogs.com/wuxl360/tag/oracle%20%E6%95%B0%E6%8D%AE%E5%BA%93/">oracle 数据库</a>(1)</li><li><a href="http://www.cnblogs.com/wuxl360/tag/Unity/">Unity</a>(1)</li><li><a href="http://www.cnblogs.com/wuxl360/tag/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/">依赖注入</a>(1)</li>
+</ul>
+</div></div><div id="sidebar_categories">
+		<h3>随笔分类</h3>
+		
+				<ul>
+			
+				<li><a id="CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/wuxl360/category/866286.html"> Knockout 官方中文文档(3)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/wuxl360/category/866268.html"> Knockout.js实战(7)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_2" href="http://www.cnblogs.com/wuxl360/category/819623.html">asp.net(24)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_3" href="http://www.cnblogs.com/wuxl360/category/819576.html">C#(34)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_4" href="http://www.cnblogs.com/wuxl360/category/869891.html">Django实战(24)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_5" href="http://www.cnblogs.com/wuxl360/category/821196.html">jquery(10)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_6" href="http://www.cnblogs.com/wuxl360/category/866199.html">knockoutjs 应用(14)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_7" href="http://www.cnblogs.com/wuxl360/category/824299.html">Linux(19)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_8" href="http://www.cnblogs.com/wuxl360/category/820754.html">MongoDB(15)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_9" href="http://www.cnblogs.com/wuxl360/category/961213.html">MT4编程(1)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_10" href="http://www.cnblogs.com/wuxl360/category/821269.html">mvc(4)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_11" href="http://www.cnblogs.com/wuxl360/category/913759.html">nginx(2)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_12" href="http://www.cnblogs.com/wuxl360/category/881483.html">NHibernate (2)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_13" href="http://www.cnblogs.com/wuxl360/category/824900.html">NoSql(2)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_14" href="http://www.cnblogs.com/wuxl360/category/819578.html">oracle(33)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_15" href="http://www.cnblogs.com/wuxl360/category/821718.html">python(77)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_16" href="http://www.cnblogs.com/wuxl360/category/912046.html">quartz.net(1)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_17" href="http://www.cnblogs.com/wuxl360/category/820525.html">redis(16)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_18" href="http://www.cnblogs.com/wuxl360/category/839214.html">Scrapy(5)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_19" href="http://www.cnblogs.com/wuxl360/category/819577.html">sqlserver(3)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_20" href="http://www.cnblogs.com/wuxl360/category/874409.html">Zookeeper (8)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_21" href="http://www.cnblogs.com/wuxl360/category/825047.html">测试(1)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_22" href="http://www.cnblogs.com/wuxl360/category/834607.html">架构(9)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_23" href="http://www.cnblogs.com/wuxl360/category/869968.html">数据库优化(3)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_24" href="http://www.cnblogs.com/wuxl360/category/892904.html">运维(3)</a> </li>
+			
+				</ul>
+			
+	
+		<h3>随笔档案</h3>
+		
+				<ul>
+			
+				<li><a id="CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/wuxl360/archive/2017/09.html">2017年9月 (2)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/wuxl360/archive/2017/08.html">2017年8月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/wuxl360/archive/2017/05.html">2017年5月 (2)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/wuxl360/archive/2017/04.html">2017年4月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_4" href="http://www.cnblogs.com/wuxl360/archive/2017/03.html">2017年3月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_5" href="http://www.cnblogs.com/wuxl360/archive/2017/02.html">2017年2月 (3)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_6" href="http://www.cnblogs.com/wuxl360/archive/2017/01.html">2017年1月 (8)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_7" href="http://www.cnblogs.com/wuxl360/archive/2016/11.html">2016年11月 (19)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_8" href="http://www.cnblogs.com/wuxl360/archive/2016/10.html">2016年10月 (4)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_9" href="http://www.cnblogs.com/wuxl360/archive/2016/09.html">2016年9月 (9)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_10" href="http://www.cnblogs.com/wuxl360/archive/2016/08.html">2016年8月 (90)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_11" href="http://www.cnblogs.com/wuxl360/archive/2016/07.html">2016年7月 (5)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_12" href="http://www.cnblogs.com/wuxl360/archive/2016/06.html">2016年6月 (31)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_13" href="http://www.cnblogs.com/wuxl360/archive/2016/05.html">2016年5月 (80)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_14" href="http://www.cnblogs.com/wuxl360/archive/2016/04.html">2016年4月 (53)</a> </li>
+			
+				</ul>
+			
+	</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817549.html#3812033">1. Re:ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据</a></li>
+        <li class="recent_comment_body">fifo队列那里的最小节点的处理是有问题的， Integer min = new Integer(list.get(0).substring(7)); f......</li>
+        <li class="recent_comment_author">--cr.wu</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817471.html#3809064">2. Re:ZooKeeper学习第一期---Zookeeper简单介绍</a></li>
+        <li class="recent_comment_body">转载博文，请贴出原文链接！！！</li>
+        <li class="recent_comment_author">--灰色技术</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817549.html#3793500">3. Re:ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据</a></li>
+        <li class="recent_comment_body">看了楼主的系列文章，写得太好了</li>
+        <li class="recent_comment_author">--msn121</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817489.html#3780971">4. Re:ZooKeeper学习第二期--ZooKeeper安装配置</a></li>
+        <li class="recent_comment_body">大神  你的路径失效了</li>
+        <li class="recent_comment_author">--无二</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817471.html#3774846">5. Re:ZooKeeper学习第一期---Zookeeper简单介绍</a></li>
+        <li class="recent_comment_body">能自己用锁吗，不是你举例的这<br><br>而是像redis setnx那样用的</li>
+        <li class="recent_comment_author">--penkee</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/wuxl360/p/5817471.html">1. ZooKeeper学习第一期---Zookeeper简单介绍(79119)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5920330.html">2. Redis集群搭建与简单使用(64200)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5567631.html">3. 爬虫框架Scrapy的第一个爬虫示例入门教程(18914)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817489.html">4. ZooKeeper学习第二期--ZooKeeper安装配置(9275)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5567065.html">5. Python爬虫进阶三之Scrapy框架安装配置(9178)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/wuxl360/p/5920330.html">1. Redis集群搭建与简单使用(15)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817471.html">2. ZooKeeper学习第一期---Zookeeper简单介绍(12)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817489.html">3. ZooKeeper学习第二期--ZooKeeper安装配置(3)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817405.html">4. 分布式服务框架 Zookeeper -- 管理分布式环境中的数据(2)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817549.html">5. ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据(2)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/wuxl360/p/5817471.html">1. ZooKeeper学习第一期---Zookeeper简单介绍(19)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5920330.html">2. Redis集群搭建与简单使用(8)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817489.html">3. ZooKeeper学习第二期--ZooKeeper安装配置(6)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817549.html">4. ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据(4)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817524.html">5. ZooKeeper学习第三期---Zookeeper命令操作(3)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+		
+<div id="footer">
+	Powered by: 
+	<br>
+	<a id="Footer1_Hyperlink3" href="http://www.cnblogs.com/" style="font-family:Verdana;font-size:12px;">博客园</a>
+	<br>
+	Copyright © 邬兴亮
+</div>
+	
+</div>			
+			
+	
+
+
+
+</body></html>

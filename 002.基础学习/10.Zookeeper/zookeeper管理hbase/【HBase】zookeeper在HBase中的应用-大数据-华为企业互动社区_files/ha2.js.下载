@@ -1,0 +1,705 @@
+//version 1.3.5
+(function() {
+
+	var oParam = new Object();
+	oParam.app = "NotSet";
+	oParam.sampleRate = 10;
+
+	var autoTrackPv = true;
+	var autoTrackApv = true;
+	var autoTrackClick = true;
+	
+	var apvStartTime = 0;
+	var documentReadyTime = 0;
+
+	var NaviUtil = {
+		addHandler : function(element, type, handler) {
+			if (element.addEventListener) {
+				element.addEventListener(type, handler, false);
+			} else if (element.attachEvent) {
+				element.attachEvent("on" + type, handler);
+			} else {
+				element["on" + type] = handler;
+			}
+		},
+
+		removeHandler : function(element, type, handler) {
+			if (element.removeEventListener) {
+				element.removeEventListener(type, handler, false);
+			} else if (element.detachEvent) {
+				element.detachEvent("on" + type, handler);
+			} else {
+				element["on" + type] = null;
+			}
+		}
+	};
+
+	// 构建 imageUrl
+	var buildImageUrl = function(o) {
+
+ 		var imageUrl = "http://support.huawei.com/da/utc.gif?";
+
+		//判断是否为https请求
+		if(window.location.href.indexOf("https://") == 0){
+			imageUrl = "https://support-s.huawei.com/da/utc.gif?";
+		}
+
+		//判断是否为https请求
+		if(window.location.href.indexOf("https://") == 0){
+			imageUrl = imageUrl.replace("http://","https://");
+		}
+
+		if (notEmpty(o.app))
+			imageUrl = imageUrl + "app=" + encode2Times(o.app);
+		if (notEmpty(o.u))
+			imageUrl = imageUrl + "&u=" + encode2Times(o.u);
+		if (notEmpty(o.s))
+			imageUrl = imageUrl + "&s=" + encode2Times(o.s);
+		if (notEmpty(o.sid))
+			imageUrl = imageUrl + "&sid=" + encode2Times(o.sid);
+		if (notEmpty(o.res))
+			imageUrl = imageUrl + "&res=" + encode2Times(o.res);
+		if (notEmpty(o.vt))
+			imageUrl = imageUrl + "&vt=" + encode2Times(o.vt);
+		if (notEmpty(o.vsid))
+			imageUrl = imageUrl + "&vsid=" + encode2Times(o.vsid);
+		if (notEmpty(o.url))
+			imageUrl = imageUrl + "&url=" + encode2Times(o.url);
+		if (notEmpty(o.rfr))
+			imageUrl = imageUrl + "&rurl=" + encode2Times(o.rfr);
+		if (notEmpty(o.ti))
+			imageUrl = imageUrl + "&ti=" + encode2Times(o.ti);
+		if (notEmpty(o.rt))
+			imageUrl = imageUrl + "&rt=" + encode2Times(o.rt);
+		if (notEmpty(o.xy))
+			imageUrl = imageUrl + "&xy=" + encode2Times(o.xy);
+		if (notEmpty(o.lang))
+			imageUrl = imageUrl + "&l=" + encode2Times(o.lang);
+		if (notEmpty(o.r1))
+			imageUrl = imageUrl + "&re1=" + encode2Times(o.r1);
+		if (notEmpty(o.r2))
+			imageUrl = imageUrl + "&re2=" + encode2Times(o.r2);
+		if (notEmpty(o.r3))
+			imageUrl = imageUrl + "&re3=" + encode2Times(o.r3);
+		if (notEmpty(o.r4))
+			imageUrl = imageUrl + "&re4=" + encode2Times(o.r4);
+		if (notEmpty(o.r5))
+			imageUrl = imageUrl + "&re5=" + encode2Times(o.r5);
+		if (notEmpty(o.r6))
+			imageUrl = imageUrl + "&re6=" + encode2Times(o.r6);
+		if (notEmpty(o.r7))
+			imageUrl = imageUrl + "&re7=" + encode2Times(o.r7);
+		if (notEmpty(o.r8))
+			imageUrl = imageUrl + "&re8=" + encode2Times(o.r8);
+		if (notEmpty(o.r9))
+			imageUrl = imageUrl + "&re9=" + encode2Times(o.r9);
+		if (notEmpty(o.r10))
+			imageUrl = imageUrl + "&re10=" + encode2Times(o.r10);
+		if (notEmpty(o.r11))
+			imageUrl = imageUrl + "&re11=" + encode2Times(o.r11);
+		if (notEmpty(o.r12))
+			imageUrl = imageUrl + "&re12=" + encode2Times(o.r12);
+		if (notEmpty(o.r13))
+			imageUrl = imageUrl + "&re13=" + encode2Times(o.r13);
+		if (notEmpty(o.r14))
+			imageUrl = imageUrl + "&re14=" + encode2Times(o.r14);
+		if (notEmpty(o.r15))
+			imageUrl = imageUrl + "&re15=" + encode2Times(o.r15);
+		if (notEmpty(o.r16))
+			imageUrl = imageUrl + "&re16=" + encode2Times(o.r16);
+		if (notEmpty(o.r17))
+			imageUrl = imageUrl + "&re17=" + encode2Times(o.r17);
+		if (notEmpty(o.r18))
+			imageUrl = imageUrl + "&re18=" + encode2Times(o.r18);
+		if (notEmpty(o.r19))
+			imageUrl = imageUrl + "&re19=" + encode2Times(o.r19);
+		if (notEmpty(o.r20))
+			imageUrl = imageUrl + "&re20=" + encode2Times(o.r20);
+		if (notEmpty(o.r21))
+			imageUrl = imageUrl + "&re21=" + encode2Times(o.r21);
+		if (notEmpty(o.r22))
+			imageUrl = imageUrl + "&re22=" + encode2Times(o.r22);
+		if (notEmpty(o.r23))
+			imageUrl = imageUrl + "&re23=" + encode2Times(o.r23);
+		if (notEmpty(o.r24))
+			imageUrl = imageUrl + "&re24=" + encode2Times(o.r24);
+		if (notEmpty(o.r25))
+			imageUrl = imageUrl + "&re25=" + encode2Times(o.r25);
+		if (notEmpty(o.r26))
+			imageUrl = imageUrl + "&re26=" + encode2Times(o.r26);
+		if (notEmpty(o.r27))
+			imageUrl = imageUrl + "&re27=" + encode2Times(o.r27);
+		if (notEmpty(o.r28))
+			imageUrl = imageUrl + "&re28=" + encode2Times(o.r28);
+		if (notEmpty(o.r29))
+			imageUrl = imageUrl + "&re29=" + encode2Times(o.r29);
+		if (notEmpty(o.r30))
+			imageUrl = imageUrl + "&re30=" + encode2Times(o.r30);
+
+		return imageUrl;
+	};
+
+	// 使用图片发送跟踪信息
+	// useTimer用来标记是否使用定时器
+	var sendByImage = function(o, useTimer) {
+
+		var image = new Image(1, 1);
+
+		if (useTimer) {
+			setTimeout(function() {
+				try {
+					image.src = buildImageUrl(o);
+				} catch (e) {
+				}
+			}, 100);
+		} else {
+			try {
+				image.src = buildImageUrl(o);
+			} catch (e) {
+			}
+		}
+	};
+
+	// 设置应用名
+	var defApp = function(strValue) {
+		oParam.app = strValue;
+		if (!notEmpty(getCookie("__hau"))) {
+			setCookie("__hau", oParam.app + "."
+					+ Math.round((new Date()).getTime() / 1000) + "."
+					+ getRandom(), 365 * 24);
+		}
+
+		if (!notEmpty(getCookie("__hasiId"))) {
+			setCookie("__hasiId", Math.round((new Date()).getTime() / 1000)
+					+ "." + getRandom(), 0);
+		}
+	};
+
+	// 指定user id的cookie名
+	var defCookieU = function(strValue) {
+		oParam.cookieU = strValue;
+	};
+
+	// 指定session的cookie名
+	var defCookieS = function(strValue) {
+		oParam.cookieS = strValue;
+	};
+
+	// 指定language的cookie名
+	var defCookieL = function(strValue) {
+		oParam.cookieL = strValue;
+	};
+
+	// 编码2次
+	var encode2Times = function(strValue) {
+		return encodeURIComponent(encodeURIComponent(strValue));
+	};
+
+	// 判断字符串非空
+	var notEmpty = function(strValue) {
+		return strValue != null && strValue != "";
+	};
+
+	var getScreen = function() {
+		if (window.screen) {
+			return screen.width + "x" + screen.height;
+		} else {
+			return null;
+		}
+	};
+
+	var getFullUrl = function(url) {
+		if (url.indexOf("http:") != 0 && url.indexOf("https:") != 0) {
+			if (url.indexOf("/") != 0) {
+				return location.href.substring(0, location.href
+						.lastIndexOf('/'))
+						+ "/" + url;
+			} else {
+				return location.href.substring(0, location.href
+						.indexOf('/', 10))
+						+ url;
+			}
+		} else {
+			return url;
+		}
+	};
+
+	var getRt = function() {
+		if (window.performance) {
+			return (performance.timing.domainLookupEnd - performance.timing.domainLookupStart)
+					+ "|"
+					+ (performance.timing.connectEnd - performance.timing.domainLookupStart)
+					+ "|"
+					+ (performance.timing.responseStart - performance.timing.domainLookupStart)
+					+ "|"
+					+ (performance.timing.responseEnd - performance.timing.domainLookupStart)
+					+ "|"
+					+ (performance.timing.domComplete - performance.timing.domainLookupStart);
+		} else {
+			return null;
+		}
+	};
+
+	var getCookie = function(name) {
+		var _regexp = new RegExp("\\b" + name + "=[^;\\b]+");
+		var _arrayCookie = document.cookie.match(_regexp);
+		if (_arrayCookie) {
+			return _arrayCookie[0].split("=")[1];
+		} else {
+			return null;
+		}
+	};
+
+	var setCookie = function(name, value, ttl) {
+		var s = name + "=" + escape(value);
+		if (ttl > 0) {
+			date = new Date();
+			date = new Date(date.getTime() + ttl * 1000 * 3600);
+			s = s + "; expires=" + date.toGMTString();
+			s = s + "; Domain=huawei.com";
+			s = s + "; path =/";
+		}
+
+		document.cookie = s;
+
+	};
+
+	// 设置访问者cookie
+	var setCookieV = function() {
+		var now = new Date();
+
+		var unixTime = Math.round(now.getTime() / 1000);
+
+		var hanm = getCookie("__hanm");
+		if (notEmpty(hanm)) {
+			var sp = hanm.split(".");
+			var nmTime = sp[sp.length - 1];
+
+			var date = new Date(parseInt(nmTime) * 1000).getDate();
+
+			if (date != now.getDate()) {
+				
+				setCookie("__hanm", getCookie("__hau") + "." + unixTime, 0.5);
+				
+			} else {				
+				
+				setCookie("__hanm", hanm, 0.5);
+				
+			}
+		} else {
+			
+			setCookie("__hanm", getCookie("__hau") + "." + unixTime, 0.5);
+
+		}
+
+	};
+
+	var getRandom = function() {
+		/*
+		 * 2,147,483,647是欧拉在1772年所发现的一个梅森素数，它等于2^31 -1，是32位操作系统中最大的符号型整型常量。
+		 */
+		return Math.round(baseRandom() * 2147483647);
+	};
+	
+	//代替Math.random()产生随机数，CodeCC修复
+	var baseRandom = function() {
+		
+		var today = new Date();
+		var seed = today.getTime();
+		
+		seed = (seed * 9301 + 49297) % 233280;
+		return seed / (233280.0);
+	};
+
+	// 鼠标相对页面的绝对坐标
+	var getCoordinate = function(event) {
+		if (event.pageX == null && event.clientX != null) {
+			var eventObj = event.srcElement ? event.srcElement : event.target;
+			var eventDoc = eventObj.ownerDocument || document;
+			var doc = eventDoc.documentElement;
+			body = eventDoc.body;
+
+			event.pageX = event.clientX
+					+ (doc && doc.scrollLeft || body && body.scrollLeft || 0)
+					- (doc && doc.clientLeft || body && body.clientLeft || 0);
+			event.pageY = event.clientY
+					+ (doc && doc.scrollTop || body && body.scrollTop || 0)
+					- (doc && doc.clientTop || body && body.clientTop || 0);
+		}
+
+		return event.pageX + "x" + event.pageY;
+	};
+
+	// 对队列进行处理
+	var handleHaq = function(_haq, useTimer) {
+		var arrayFunction = _haq.shift();
+
+		if ("_defApp" === arrayFunction[0]) {
+			defApp(arrayFunction[1]);
+		} else if ("_defCookieU" === arrayFunction[0]) {
+			defCookieU(arrayFunction[1]);
+		} else if ("_defCookieS" === arrayFunction[0]) {
+			defCookieS(arrayFunction[1]);
+		} else if ("_defCookieL" === arrayFunction[0]) {
+			defCookieL(arrayFunction[1]);
+		} else if ("_defAutoTrackApv" === arrayFunction[0]) {
+			if (typeof arrayFunction[1] === "boolean") {
+				autoTrackApv = arrayFunction[1];
+			}
+		} else if ("_defAutoTrackPv" === arrayFunction[0]) {
+			if (typeof arrayFunction[1] === "boolean") {
+				autoTrackPv = arrayFunction[1];
+			}
+		} else if ("_defAutoTrackClick" === arrayFunction[0]) {
+			if (typeof arrayFunction[1] === "boolean") {
+				autoTrackClick = arrayFunction[1];
+			}
+		} else if ("_trackPv" === arrayFunction[0]) {
+			setCookieV();
+			if (typeof arrayFunction[1] === "object") {
+				trackPageView(arrayFunction[1], useTimer);
+			} else {
+				trackPageView(new Object(), useTimer);
+			}
+		} else if ("_trackClick" === arrayFunction[0]) {
+			setCookieV();
+			if (typeof arrayFunction[1] === "object") {
+				trackClick(arrayFunction[1], useTimer);
+			} else {
+				trackClick(new Object(), useTimer);
+			}
+		} else if ("_trackEvent" === arrayFunction[0]) {
+			setCookieV();
+			if (typeof arrayFunction[1] === "object") {
+				trackEvent(arrayFunction[1], useTimer);
+			} else {
+				trackEvent(new Object(), useTimer);
+			}
+		} else if ("_trackEvt" === arrayFunction[0]) {
+			setCookieV();
+			if (typeof arrayFunction[1] === "object") {
+				trackEvt(arrayFunction[1], useTimer);
+			} else {
+				trackEvt(new Object(), useTimer);
+			}
+		} else if ("_trackApv" === arrayFunction[0]) {
+			setCookieV();
+			if (typeof arrayFunction[1] === "object") {
+				trackApv(arrayFunction[1], useTimer);
+			} else {
+				trackApv(new Object(), useTimer);
+			}
+		}else if ("_trackPage" === arrayFunction[0]) {
+			if (typeof arrayFunction[1] === "object") {
+				trackPage(arrayFunction[1], useTimer);
+			} else {
+				trackPage(new Object(), useTimer);
+			}
+		}else if ("_trackFST" === arrayFunction[0]) {
+			if (typeof arrayFunction[1] === "object") {
+				trackFST(arrayFunction[1], useTimer);
+			} else {
+				trackFST(new Object(), useTimer);
+			}
+		}
+	};
+
+	// 判断浏览器插件
+	var mimeType = function(s) {
+		var navi = navigator || window.navigator;
+		if (navi.mimeTypes && navi.mimeTypes.length) {
+
+			return navi.mimeTypes[s] && navi.mimeTypes[s].enabledPlugin;
+		}
+		return false;
+	};
+
+	var hasIEPlugin = function(name) {
+		try {
+			new ActiveXObject(name);
+			return true;
+		} catch (e) {
+			return false;
+		}
+	};
+
+	var getBasicInfo = function(o) {
+		o.app = oParam.app;
+		o.u = getCookie(oParam.cookieU);
+		o.s = getCookie(oParam.cookieS);
+		o.sid = getCookie("__hau");
+		o.rfr = o.rfr ? o.rfr : document.referrer;
+		o.res = getScreen();
+		o.lang = getCookie(oParam.cookieL);
+		o.url = o.url ? o.url : location.href;
+		o.ti = o.ti ? o.ti : document.title;
+		o.vsid = getCookie("__hanm");
+	};
+
+	var getPageInfo = function(o) {
+		o.r1 = o.module;
+		o.r2 = o.navi;
+		o.r3 = o.navi_name;
+		o.r4 = o.pbi;
+		o.r5 = o.pbi_name;
+		o.r6 = o.res_type;
+		o.r7 = o.res_id;
+		o.r8 = o.res_title;
+		o.r17 = o.offering;
+		o.r18 = o.jsondata;
+	};
+
+	var getClientInfo = function(o) {
+		var cookie, flash, s, java, pdf;
+		var navi = navigator || window.navigator;
+
+		cookie = navi.cookieEnabled ? "1" : "0";
+
+		flash = (mimeType("application/x-shockwave-flash") || hasIEPlugin("ShockwaveFlash.ShockwaveFlash")) ? "1"
+				: "0";
+		s = (mimeType("application/x-silverlight") || hasIEPlugin("AgControl.AgControl")) ? "1"
+				: "0";
+		java = (mimeType("application/x-java-vm") || (typeof navi.javaEnabled != 'unknown'
+				&& undefined != navi.javaEnabled && navi.javaEnabled())) ? "1"
+				: "0";
+		pdf = (mimeType("application/pdf") || hasIEPlugin("AcroPDF.PDF") || hasIEPlugin("PDF.PdfControl")) ? "1"
+				: "0";
+
+		o.r9 = cookie + "|" + flash + "|" + s + "|" + java + "|" + pdf;
+
+		var now = new Date();
+		o.r10 = -now.getTimezoneOffset() / 60;
+		o.r11 = Math.round(now.getTime() / 1000);
+
+		getBrowserInfo(o);
+
+	};
+
+	var getBrowserInfo = function(o) {
+		var navi = navigator || window.navigator;
+
+		o.r14 = navi.browserLanguage || navi.language;
+		o.r15 = navi.platform;
+	};
+
+	var trackPageView = function(o, useTimer) {
+		if (autoTrackPv && o.track_mode != 'auto') {
+			return;
+		}
+
+		if (!autoTrackPv && o.track_mode == 'auto') {
+			return;
+		}
+		
+		getBasicInfo(o);
+		
+		getPageInfo(o);
+
+		o.vt = "pv";
+		o.rt = getRt();
+
+		getClientInfo(o);
+
+		o.r16 = o.track_mode == 'auto' ? "auto" : "manual";
+
+		sendByImage(o, useTimer);
+	};
+	
+	var trackPage = function(o, useTimer) {
+		getBasicInfo(o);
+			
+		getPageInfo(o);
+
+		o.vt = "pg";
+
+		sendByImage(o, useTimer);
+	};
+
+	var trackClick = function(o, useTimer) {
+		if (autoTrackClick) {
+			getBasicInfo(o);
+
+			o.vt = "click";
+
+			sendByImage(o, useTimer);
+		}
+	};
+
+	var trackApv = function(o, useTimer) {
+		getBasicInfo(o);
+
+		getPageInfo(o);
+
+		getClientInfo(o);
+
+		o.vt = "apv";
+		o.r16 = o.track_mode == 'auto' ? "auto" : "manual";
+
+		sendByImage(o, useTimer);
+	};
+
+	var trackFST = function(o, useTimer) {
+		getBasicInfo(o);
+		
+		getClientInfo(o);
+		
+		o.vt = "fst";
+		o.rt = getRt();
+		
+	    o.r16 = o.category;
+	    o.r17 = o.type;
+	    o.r18 = o.startTime;
+	    o.r19 = o.endTime;
+	    o.r20 = o.ajaxStatus;
+	    o.r21 = o.ajaxErrorCuase;
+	    o.r22 = documentReadyTime;
+	    
+		sendByImage(o, useTimer);
+	};
+
+	var trackEvent = function(o, useTimer) {		
+		o.r30 = o.url;		
+		o.url = location.href;
+		
+		getBasicInfo(o);
+
+		o.vt = "evt-" + o.vt;
+
+		sendByImage(o, useTimer);
+	};
+
+	var trackEvt = function(o, useTimer) {
+		getBasicInfo(o);
+
+		o.ti = document.title;
+		o.vt = "evt";
+
+		o.r1 = o.category;
+		o.r2 = o.action;
+		o.r3 = o.label;
+		o.r4 = o.value;
+		o.r5 = o.container;
+		o.r6 = o.duration;
+		o.r7 = o.start_time;
+		o.r8 = o.c_data;
+		o.r9 = o.c_json;
+
+		sendByImage(o, useTimer);
+	};
+
+	var handler = function() {
+		if (document.readyState === "complete" || document.readyState === "interactive") {
+			documentReadyTime = (new Date()).getTime();
+			var o = new Object();
+			o.track_mode = 'auto';
+			_haq.push([ '_trackPv', o ]);
+			// 定时执行队列
+			setInterval(function() {
+				if (typeof _haq != "undefined") {
+					while (_haq && _haq.length > 0) {
+						handleHaq(_haq, true);
+					}
+				}
+			}, 1000);
+		}
+	};
+
+	var clickHandler = function(evt) {
+		if (!autoTrackClick) {
+			return;
+		}
+
+		var e = evt || window.event;
+
+		var tg = e.target || e.srcElement;
+
+		var tgName = tg.tagName ? tg.tagName.toUpperCase() : "";
+		
+		var tgType = tg.getAttribute("type") ? tg.getAttribute("type").toUpperCase() : "";
+		
+		var tgParent = tg.parentElement;
+		
+		var tgGrand = tgParent ? tgParent.parentElement : null;
+		
+		var tgFlag = null;//标识取的事件对象是当前的元素、父元素还是祖父元素
+ 
+		if (!("A" == tgName 
+			|| ("INPUT" == tgName && "SUBMIT" == tgType)
+			|| ("INPUT" == tgName && "BUTTON" == tgType)
+			|| "BUTTON" == tgName)) 
+		{
+			if(tgParent && "A" == tgParent.tagName.toUpperCase())
+			{
+				tgFlag = "parent";
+			}
+			else if (tgGrand && "A" == tgGrand.tagName.toUpperCase())
+			{
+				tgFlag = "grand";
+			}
+			else
+			{
+				return;
+			}
+		}
+
+		var o = new Object(); 
+		
+		var ti = tg.innerText || tg.textContent || tg.value;
+
+		o.ti = ti ? ti.substring(0, 100).replace(/\t/g, " ").replace(/\n/g, " ") : "";
+
+		o.xy = getCoordinate(e);
+		
+		if(tgFlag == "parent")
+		{
+			tg = tgParent;
+		}
+		else if(tgFlag == "grand")
+		{
+			tg = tgGrand;
+		}
+
+		o.r1 = tg.getAttribute("ha_category");
+		o.r2 = tg.getAttribute("ha_action");
+		o.r3 = tg.getAttribute("ha_label");
+		o.r4 = tg.getAttribute("ha_value");
+		o.r5 = tg.getAttribute("ha_container");
+		o.r8 = tg.getAttribute("ha_data");
+		o.r9 = tg.getAttribute("ha_json");
+
+		o.r16 = tg.tagName ? tg.tagName.toUpperCase() : "";
+		o.r17 = tg.getAttribute("id");
+		o.r18 = tg.getAttribute("href");
+		o.r19 = tg.getAttribute("name");
+		o.r20 = tg.getAttribute("class");
+		o.r21 = tg.getAttribute("ha_name");
+//		o.r22 = tg.outerHTML.substring(0, 100). replace(/\t/g, " ").replace(/\n/g, " ");
+		o.r23 = tgName;//原始点击dom类型
+
+		_haq.push([ '_trackClick', o ]);
+
+	};
+
+	NaviUtil.addHandler(document, 'readystatechange', handler);
+
+	NaviUtil.addHandler(document, 'click', clickHandler);
+
+	var pageUrlPlusHashbang = location.href + "#";
+	NaviUtil.addHandler(window, 'hashchange', function() {
+        apvStartTime = (new Date()).getTime(); 
+		if (autoTrackApv && location.href != pageUrlPlusHashbang) {
+			var o = new Object();
+			o.track_mode = 'auto';
+			_haq.push([ '_trackApv', o ]);
+		}
+	});
+
+	NaviUtil.addHandler(window, 'beforeunload', function() {
+		if (typeof _haq != "undefined") {
+			while (_haq.length > 0) {
+				handleHaq(_haq, false);
+			}
+		}
+	});
+
+})();

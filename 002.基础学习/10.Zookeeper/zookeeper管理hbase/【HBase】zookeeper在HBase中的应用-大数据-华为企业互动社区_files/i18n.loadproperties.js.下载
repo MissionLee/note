@@ -1,0 +1,29 @@
+
+jQuery.i18n.properties({//加载资浏览器语言对应的资源文件
+    name: 'string', //资源文件名称    modify-wzm js语言包路径前缀从base中获取
+    path: document.getElementsByTagName('base')[0].href + '/huawei/static/js/language/', //资源文件路径
+    mode: 'map', //用Map的方式使用资源文件中的值
+    language: getLanguageFromCookie()
+});
+
+function getLanguageFromCookie(){
+    //获取cookie字符串
+    var strCookie=document.cookie;
+    //将多cookie切割为多个名/值对
+    var arrCookie=strCookie.split("; ");
+    var language = 'zh';
+    //遍历cookie数组，处理每个cookie对
+    for(var i=0;i<arrCookie.length;i++) {
+        var arr = arrCookie[i].split("=");
+        //找到名称为lang的cookie，并返回它的值
+        if ("lang" == arr[0]) {
+            language = arr[1];
+            break;
+        }
+    }
+    //modify-wzm jdc要搞特殊化，只懂中文
+    if (document.getElementsByTagName('base')[0].href.indexOf('/jdc/') != -1) {
+        language = 'zh';
+    }
+    return language;
+}

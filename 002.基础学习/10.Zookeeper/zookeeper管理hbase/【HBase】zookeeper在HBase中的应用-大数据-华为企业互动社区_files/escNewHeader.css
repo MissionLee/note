@@ -1,0 +1,343 @@
+/* CSS Document */
+.w1200 {
+	width: 1200px;
+	margin-right: auto;
+	margin-left: auto;
+}
+.header {
+	height: 82px;
+	background-image: url(../image/touying.png);
+	background-repeat: repeat-x;
+	background-position: center top;
+	margin-bottom: 10px;
+}
+.header .logo {
+	float: left;
+	padding-top: 14px;
+	width: 250px;
+}
+.header .nav {
+	float: left;
+	padding-top: 20px;
+	margin-left:20px;
+}
+.header .nav a {
+	color: #000;
+	display: block;
+	float: left;
+	margin-right: 15px;
+	margin-left: 15px;
+	font-size: 16px;
+	padding-right: 1px;
+	padding-left: 1px;
+}
+.header .nav a:hover {
+	text-decoration: none;
+	color: #e22835;
+}
+.header .nav .active {
+	text-decoration: none;
+	color: #e22835;
+	border-bottom-width: 2px;
+	border-bottom-style: solid;
+	border-bottom-color: #e22835;
+}
+.header .nav .open {
+	padding-right: 12px;
+	background-image: url(../image/xia.png);
+	background-repeat: no-repeat;
+	background-position: right 10px;
+}
+.header .nav .open:hover {
+	background-image: url(../image/xia.png);
+	background-repeat: no-repeat;
+	background-position: right -40px;
+}
+
+.top-bar {
+	float: right;
+	font-size: 13px;
+	padding-top: 15px;
+}
+.top-bar .loginsuc-name a {
+	color: #333333;
+	padding-right: 12px;
+	padding-left: 10px;
+	background-image: url(../image/xia.png);
+	background-repeat: no-repeat;
+	background-position: right 8px;
+}
+.top-bar .loginsuc-name a:hover {
+	color: #e22835;
+	text-decoration: none;
+	background-image: url(../image/xia.png);
+	background-repeat: no-repeat;
+	background-position: right -42px;
+}
+.top-bar.loginsuc-name a img {
+	vertical-align: middle;
+	margin-right: 8px;
+	-moz-border-radius: 18px; /* Firefox */
+	-webkit-border-radius: 18px; /* Safari 和 Chrome */
+	border-radius: 18px; /* Opera 10.5+, 以及使用了IE-CSS3的IE浏览器 */
+}
+.top-bar .language {
+	margin-left: 12px;
+	padding-left: 12px;
+	border-left-width: 1px;
+	border-left-style: solid;
+	border-left-color: #CCCCCC;
+	color: #333333;
+}
+.top-bar .language:hover {
+	color: #e22835;
+	text-decoration: none;
+}
+/* 搜索 */
+.Search{
+	display:inline-block;
+	height:36px;
+	float:right;
+	position:relative;
+	margin-top: 15px;
+	margin-right: 10px;
+	background-color: #fff;
+	background-image: url(../image/esc_ico.png);
+	background-repeat: no-repeat;
+	background-position: -100px -2px;
+	padding-left: 10px;
+}
+.SearchTxt{
+	height:36px;
+	width:152px;
+	line-height:36px;
+	float:left;
+	margin-right:5px;
+	background:transparent;
+	color: #999;
+	border: 0px none #212427;
+	padding-top: 0;
+	padding-right: 0;
+	padding-bottom: 0;
+	padding-left: 5px;
+}
+.SearchBtn{
+	height:36px;
+	width:36px;
+	border:0;
+	cursor:pointer;
+	float:left;
+	background:transparent;
+	background-image: url(../image/esc_ico.png);
+	background-repeat: no-repeat;
+	background-position: -108px -63px;
+}
+.SearchBtn:hover{
+	background:transparent;
+	background-image: url(../image/esc_ico.png);
+	background-repeat: no-repeat;
+	background-position: -188px -63px;
+}
+
+.Search:hover .SearchZhan{display:block;z-index: 100;}
+.Search .SearchZhan{
+	position:absolute;
+	top:36px;
+	left:12px;
+	width:174px;
+	padding:5px;
+	display:none;
+	font-size: 12px;
+	line-height: 20px;
+	background-color: #fff;
+	box-shadow: 0 1px 12px 0 rgba(0,0,0,.2);
+}
+.Search .SearchZhan input{margin:0 5px 0 5px;*margin:0 3px 0 3px; display:inline-block; vertical-align:middle;}
+.Search .SearchZhan label{color:#333;display:inline-block; vertical-align:middle;}
+.Search .SearchZhan label:hover{color:#33b1eb;}
+
+
+.loginsuc-name a{
+	color:#333
+}
+.login-lang{margin-top:5px;}
+
+.footer {
+	background-color: #2f3438;
+	clear: both;
+	padding-top: 15px;
+	padding-bottom: 20px;
+	height: 130px;
+}
+.footer-image {
+	float: left;
+	background-image: url(../image/footer-image.png);
+	background-repeat: no-repeat;
+	background-position: left center;
+	padding-left: 30px;
+	margin-right: 20px;
+}
+.footer-main {
+	float: left;
+}
+.footer-main .imge {
+	padding-right: 5px;
+	padding-left: 5px;
+}
+.footer-main .imge img {
+	vertical-align: middle;
+}
+.footer-main .footer-nav {
+	font-size: 14px;
+	margin-top: 10px;
+}
+.footer-main .footer-nav a {
+	color: #81868d;
+	margin-right: 40px;
+	text-decoration: underline;
+}
+.footer-main .footer-nav a:hover {
+	color: #fff;
+}
+.footer-main .footer-bottom {
+	color: #bcbec3;
+	background-image: url(../image/footer_logo.png);
+	background-repeat: no-repeat;
+	background-position: left center;
+	padding-left: 60px;
+	font-size: 14px;
+	line-height: 20px;
+	height: 42px;
+	margin-top: 40px;
+}
+.footer-main .footer-bottom a {
+	color: #bcbec3;
+}
+.footer-code {
+	float: right;
+}
+.login-no{margin-top:5px;}
+.loginsuc-pic a img {
+	margin-top: 0px;
+	height: 36px;
+	width: 36px;
+}
+#mymenu_menu{box-shadow:0 1px 12px 0 rgba(0,0,0,.2);border-radius:0 0 4px 4px;color:#444;z-index:14;-ms-filter:"progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=135, Color='#000000')";
+	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=135, Color='#000000');}
+#mymenu_menu .hnus-footer a{
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius:0px;
+	border-right: none;
+	width:110px;
+}
+#mymenu_menu{
+	position: absolute; z-index: 301; left: 1395px; top: 60px;margin-top:20px;margin-left:15px;
+}
+
+.header .nav .forumPullDown{
+	padding-right: 12px;
+	background-image: url(../image/xia.png);
+	background-repeat: no-repeat;
+	background-position: 37px 11px;
+	height:50px;
+}
+
+.header .nav .forumPullUp{
+	text-decoration: none;
+	background-image: url(../image/xia.png);
+	background-repeat: no-repeat;
+	background-position: right -40px;
+	height:50px;
+}
+/*  论坛_展开   */
+/*  论坛_展开   */
+#forum_open {
+	background-image: url(../image/touying2.png);
+	background-repeat: repeat-x;
+	background-position: center bottom;
+	position: absolute;
+	top: 73px;
+	width: 100%;
+	padding-bottom: 7px;
+	clear: both;
+	overflow: hidden;
+	z-index:2;
+}
+#forum_open .forum_all {
+	background-color: #FFFFFF;
+	background-image: url(../image/touying.png);
+	background-repeat: repeat-x;
+	background-position: center -72px;
+	padding-top: 15px;
+	width: 100%;
+	clear: both;
+	overflow: hidden;
+}
+#forum_open .forum_open_280 {
+	width: 300px;
+	float: left;
+}
+#forum_open ul {
+	line-height: 22px;
+	background-image: url(../image/xia_2.png);
+	background-repeat: no-repeat;
+	background-position: left 10px;
+	padding-left: 14px;
+	margin-bottom: 12px;
+}
+#forum_open ul h3 {
+	font-size: 15px;
+	line-height: 28px;
+	color: #000;
+}
+#forum_open ul a {
+	font-size: 14px;
+	color: #666;
+}
+#forum_open ul a:hover {
+	color: #e22835;
+	text-decoration: underline;
+}
+.search_box{
+	width: 1200px;
+	margin-right: auto;
+	margin-left: auto;
+}
+.wrap .found_community, .find_community{
+	z-index:1;
+}
+.wrap .find_community{
+	z-index:1;
+}
+#mymenu_menu{width:110px;}
+#pt{
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+}
+#backTop{
+	width:60px;
+	height:60px;
+}
+#backTop a{
+	display:none;
+	background-position:0 -61px;
+}
+.widget{
+	right:0;
+	z-index:9;
+	bottom:120px;
+	position:fixed;
+}
+.widget a{
+	width:60px;
+	height:60px;
+	display:block;
+	background-repeat:no-repeat;
+	background-image:url(images/BackTop.png);
+}
+input::-webkit-input-placeholder{color: #cccccc !important}
+input:-moz-placeholder {color: #cccccc !important;}
+input::-moz-placeholder {color: #cccccc !important;}
+input:-ms-input-placeholder{color: #cccccc !important;}
+#mymenu_menu .hnus-footer a:hover{text-decoration:none}

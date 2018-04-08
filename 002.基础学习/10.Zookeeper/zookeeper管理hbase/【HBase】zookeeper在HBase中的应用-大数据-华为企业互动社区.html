@@ -1,0 +1,1401 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0069)http://support.huawei.com/huaweiconnect/enterprise/thread-327537.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" style="height: 100%;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9">
+<title>
+	
+【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区</title>
+<link href="http://support.huawei.com/huaweiconnect/enterprise/thread-327537-1-1.html" rel="canonical"><!--<base href="http://support.huawei.com/huaweiconnect/enterprise/">--><base href=".">
+<meta name="keywords" content="大数据">
+<meta name="description" content="面向众多行业客户推出的，基于Apache开源社区软件进行功能增强的企业级大数据存储、查询和分析的统一平台、建模中间件及OM系统。并针对数据密集型行业的大数据项目设计实施、开发、分析、运维等需求，提供专业服务，让企业可以更快、更准、更稳的从各类繁杂无序的海量数据中发现全新价值点和企业商机。">
+<meta name="MSSmartTagsPreventParsing" content="True">
+<meta http-equiv="MSThemeCompatible" content="Yes">
+<meta name="viewport" content="initial-scale=1.0,width=device-width">
+<meta http-equiv="Cache-Control" content="no-cache,no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0"><link rel="stylesheet" type="text/css" href="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/style_7_common.css"><link rel="stylesheet" type="text/css" href="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/style_7_forum_viewthread.css"><script type="text/javascript" async="" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/ga.js.下载"></script><script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/ha1.js.下载" type="text/javascript"></script>
+<script type="text/javascript">
+var STYLEID = '7', STATICURL = 'static/', IMGDIR = 'static/image/common', APPID = '1',
+VERHASH = 'JNo', charset = 'utf-8', discuz_uid = '0',
+cookiepre = 'D493_2132_', cookiedomain = '', 
+cookiepath = '/', showusercard = '1', 
+attackevasive = '0', disallowfloat = '',
+creditnotice = '1|E币|,3|培训积分|,4|金币|,5|威望|,6|E花蜜|', 
+defaultstyle = '', REPORTURL = 'aHR0cDovL3N1cHBvcnQuaHVhd2VpLmNvbS9odWF3ZWljb25uZWN0L2VudGVycHJpc2UvdGhyZWFkLTMyNzUzNy5odG1s', SITEURL = 'http://support.huawei.com/huaweiconnect/enterprise/',
+JSPATH = 'static/js/', DYNAMICURL = '';
+</script>
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/jquery-1.11.1.min.js.下载" type="text/javascript"></script>
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/common.js.下载" type="text/javascript"></script>
+<meta name="application-name" content="`@trans`hw_enterprise`~trans`">
+<meta name="msapplication-tooltip" content="`@trans`hw_enterprise`~trans`">
+<meta name="msapplication-task" content="name=`@trans`key_forumhome`~trans`;action-uri=http://support.huawei.com/huaweiconnect/enterprise/forum.php;icon-uri=http://support.huawei.com/huaweiconnect/enterprise/static/image/common/bbs.ico">
+
+<meta name="msapplication-task" content="name=圈子;action-uri=http://support.huawei.com/huaweiconnect/enterprise/group.php;icon-uri=http://support.huawei.com/huaweiconnect/enterprise/static/image/common/group.ico"><meta name="msapplication-task" content="name=`@trans`key_activities`~trans`;action-uri=http://support.huawei.com/huaweiconnect/enterprise/home.php;icon-uri=http://support.huawei.com/huaweiconnect/enterprise/static/image/common/home.ico"><link rel="archives" title="`@trans`hw_enterprise`~trans`" href="http://support.huawei.com/http://support.huawei.com/huaweiconnect/enterprise/archiver/">
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/forum.js.下载" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/reset.css">
+    <link rel="stylesheet" type="text/css" href="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/css.css">
+<link href="http://support.huawei.com/huaweiconnect/enterprise/favicon.ico" rel="shortcut icon">
+<link rel="stylesheet" type="text/css" href="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/enterpriseForum.css">
+<link rel="stylesheet" type="text/css" href="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/escNewHeader.css">
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/jquery.i18n.properties-1.0.9.min.js.下载" type="text/javascript"></script>
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/i18n.loadproperties.js.下载" type="text/javascript"></script>
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/jquery.placeholder.min.js.下载" type="text/javascript"></script>
+    <script type="text/javascript">
+    	var JQ = jQuery.noConflict();
+    </script>
+</head>
+
+<body style="min-height: 100%; height: auto; position: relative;"><div class="wrap">
+<div class="header">
+<div class="w1200">
+
+<div class="top-bar">
+<div class="login-lang"> |&nbsp;
+<a href="http://support.huawei.com/huaweiconnect/enterprise/language.php?lang=en">English</a>
+</div>
+  <div class="login-no">
+<a href="http://support.huawei.com/huaweiconnect/enterprise/member.php?mod=logging&amp;action=login">
+登录
+</a>/
+<a href="http://support.huawei.com/huaweiconnect/enterprise/member.php?mod=register">注册</a> &nbsp;
+</div>
+</div> 
+<!--  --><span class="Search" id="scbartext">
+<form id="scbar_form" method="post" action="http://support.huawei.com/huaweiconnect/enterprise/search.php?searchsubmit=yes" target="_blank">
+<input type="hidden" name="formhash" value="a0c9806a">
+<input type="hidden" name="srchtype" value="title">
+<input type="hidden" name="srhfid" value="783">
+<input type="hidden" name="srhlocality" value="forum::viewthread">
+          <input name="srchtxt" placeholder="搜索" id="scbar_txt" type="text" class="SearchTxt">
+          <input class="SearchBtn" type="submit" sc="1" value="">
+          <div class="SearchZhan">
+                 <table width="100%">
+              <tbody>
+                <tr>
+                  <td>
+                  	                  		<input type="radio" class="xg1" name="mod" value="ebggroup" id="s1" rel="ebggroup" checked="checked">
+                  	                  	<label for="s1">帖子</label>
+                  </td>
+                   <td>
+                  	<input type="radio" class="xg1" name="mod" value="forum" id="s0" rel="forum">
+                    <label for="s1">圈子</label>
+                   </td>
+                </tr>
+                <tr>
+                  <td>
+                  	<input type="radio" class="xg1" name="mod" value="user" id="s2" rel="user">
+                  	<label for="s2">用户</label>
+                  </td><td>
+                  	<input type="radio" class="xg1" name="mod" value="searchdoc" id="s3" rel="searchdoc">
+                  	<label for="s3">文档</label>
+                </td></tr>
+              </tbody>
+            	</table>
+          </div>
+</form>
+ </span>
+<div id="append_parent"></div><div id="ajaxwaitid"></div>
+  <div class="logo"><a href="http://support.huawei.com/huaweiconnect/enterprise/index.html"><img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/logo_enterprise_zh.png" width="250" height="43" border="0" alt="企业互动社区"></a></div>
+        <div class="nav"><a href="http://support.huawei.com/huaweiconnect/enterprise/index.html">
+首页</a>
+<a href="http://support.huawei.com/huaweiconnect/enterprise/forum.html" class="active forumPullDown">
+论坛</a>
+<a href="http://support.huawei.com/huaweiconnect/enterprise/group.html">
+圈子</a>
+<a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=collection">
+专题</a>
+<a href="http://support.huawei.com/huaweiconnect/enterprise/mall.html">
+积分商城</a>
+        </div>
+  </div>
+</div>
+<div id="getHeaderForum" style="display: none;" tabindex="2"></div>
+<script>
+JQ(function($){
+$('.forumPullDown').on('mouseover',function(){
+$('#forum_open').length == 0 && $('#getHeaderForum').load('forum.php?mod=getHeaderForum&action=getHeaderForum');
+$('#getHeaderForum').show();
+$(this).addClass('forumPullUp');
+})
+$('.forumPullDown').siblings().on('mouseover',function(){
+$('#getHeaderForum').hide();
+$('.forumPullDown').removeClass('forumPullUp');
+})
+$('.forumPullDown').on('mouseleave',function(e){
+var this_x =e.pageX || e.clientX + document.body.scroolLeft;
+var this_y =e.pageY || e.clientY + document.body.scroolTop;
+var this_left = $(this).offset().left;
+var this_right = $(this).offset().left + $(this).width();
+var this_top = $(this).offset().top;
+if(this_x > (this_right + 15) || this_x < (this_left - 15) || this_y < this_top){
+$('#getHeaderForum').hide();
+$('.forumPullDown').removeClass('forumPullUp');
+}
+})
+$('#getHeaderForum').on('mouseout',function(e){
+var this_h = $('#forum_open').height();
+var this_y = e.pageY || e.clientY + document.body.scrollTop;
+if(this_y > this_h){
+$('#getHeaderForum').hide();
+$('.forumPullDown').removeClass('forumPullUp');
+}
+})
+})
+</script><style>
+body{background-color: #F1F4F6;}
+.sidebar_xiangxi2 a:hover{text-decoration:none}
+.pg a.nxt{
+padding-right: 25px;
+background-image: url(http://support.huawei.com/huaweiconnect/enterprise/static/image/common/arw_r.gif);
+background-position: 60% 50%;
+padding:0px 6px;
+}
+.hbp-pager label{display:inline-block}
+</style>
+<script type="text/javascript">var fid = parseInt('783'), tid = parseInt('327537');</script>
+
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/forum_viewthread.js.下载" type="text/javascript"></script>
+<script type="text/javascript">zoomstatus = parseInt(1);var imagemaxwidth = '600';var aimgcount = new Array(); jQuery(document).on('ready',function(){ jQuery('td[id^="postmessage_"]').find('img:not([src*="\/smiley\/"])').on('click', function(e){ t = e.target; zoom(t, t.src, 0, 0, 0); }) }); </script>
+
+<style id="diy_style" type="text/css"></style>
+<!--[diy=diynavtop]--><div id="diynavtop" class="area"></div><!--[/diy]-->
+<div class="wp">
+<!--[diy=diy1]--><div id="diy1" class="area"></div><!--[/diy]-->
+</div>
+
+<div class="main w960">
+<div class="sidebar_xiangxi">
+          <div class="sidebar_xiangxi2">
+      	<a href="javascript:showWindow(&#39;reply&#39;, &#39;forum.php?mod=post&amp;action=reply&amp;fid=783&amp;tid=327537&#39;)" class="huifu">
+      	<div>
+      		<img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/xiangxi_huifu.png" width="32" height="32"><br>
+        	回复帖子
+        </div>
+        </a>
+        <a href="http://support.huawei.com/huaweiconnect/enterprise/forum-783.html" class="fanhui">
+        <div>
+        	<img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/xiangxi_fanhui.png" width="32" height="32">
+        	<br>返回列表
+        </div>
+        </a>
+        <ul class="qita">
+          <!-- 加入 -->
+                                  <!-- 发表 -->
+          	<li>
+          		<a href="javascript:showWindow(&#39;newthread&#39;, &#39;forum.php?mod=post&amp;action=newthread&amp;fid=783&#39;)" class="qita1 pa-fb">
+          			<span>发表</span>
+          		</a>
+          	</li>
+          <!-- 点评 -->
+          <li>
+          	<a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=misc&amp;action=comment&amp;tid=327537&amp;pid=1340841&amp;extra=page%3D&amp;page=1" onclick="showWindow(&#39;comment&#39;, this.href, &#39;get&#39;, 0)" class="qita2 pa-dp">
+          		<span>点评</span>
+          	</a>
+          </li>
+          <!-- 评分 -->
+          	<li>
+          		<a href="javascript:;" onclick="showWindow(&#39;rate&#39;, &#39;forum.php?mod=misc&amp;action=rate&amp;tid=327537&amp;pid=1340841&#39;, &#39;get&#39;, -1);return false;" class="qita3 pa-pf">
+          			<span>评分</span>
+          		</a>
+          	</li>
+          <!-- 分享  -->
+          	<li><a href="javascript:;" class="qita4 pa-fx"><span>微博</span></a></li>
+        </ul>
+      </div>
+   
+</div>
+
+<div id="breadcrumbs"><a href="http://support.huawei.com/huaweiconnect/enterprise/forum.html">
+论坛
+</a> &gt;
+<a href="http://support.huawei.com/huaweiconnect/enterprise/forum-783.html" class="mw350 ellipsis" title="大数据">大数据</a>
+&gt;			
+<a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=forumdisplay&amp;fid=783&amp;filter=typeid&amp;typeid=1525">
+经验交流</a>
+</div>
+
+<div class="content_xiangxi">
+<div class="hw-robot-view">
+<!--[diy=doc-robot]--><div id="doc-robot" class="area"></div><!--[/diy]-->
+</div>
+
+
+<!--//MODIFY-ZQF 商品返回商城-->
+
+<div id="postlist" class="pl bm">
+<table cellspacing="0" cellpadding="0">
+<tbody><tr>
+<td>
+      <div class="xiangxi_title">
+        <h1 class="ts">
+<span id="thread_subject">【HBase】zookeeper在HBase中的应用</span>
+</h1>
+<span class="xg1">
+<a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=viewthread&amp;tid=327537" onclick="return copyThreadUrl(this, &#39;华为企业互动社区&#39;)">[复制链接]</a>
+</span>
+
+      			</div>
+      
+</td>
+</tr>
+</tbody></table>
+  
+
+    
+    <!--[TODO]已发表和回复的帖子列表 [begin] --><div id="post_1340841"><table id="pid1340841" class="plhin" summary="pid1340841" cellspacing="0" cellpadding="0">
+<tbody><tr>
+    <!--[TODO]右侧框（帖子信息） [begin] -->
+<td class="plc" style="width:100%">
+        <!--[TODO]帖子信息-发表于**天前、只看见作者、只看大图 [begin] -->
+<!-- <div class="pi pd-h">  -->
+        <div class="xiangxi_author">
+            
+<!--增加最佳答案小图标-->
+                
+
+            
+<!-- <div class="pti pdh-avatar"> -->
+            <div class="pti">
+<div class="pdbt">
+</div>
+
+                <!--[TODO] 显示作者的头像 [begin] -->
+<a href="http://support.huawei.com/huaweiconnect/enterprise/space-uid-87549.html" target="_blank" class="author01" c="1" mid="card_1061"><img class="avatar" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/noavatar_small.gif" onerror="this.onerror=null;this.src=&#39;http://support.huawei.com/huaweiconnect/enterprise/uc_server/images/noavatar_small.gif&#39;"></a>
+                <!--[TODO] 显示作者的头像 [end] -->
+
+                    
+                	<div class="author02">
+                    <!--[TODO] 显示“‘作者’发表于‘什么时间’” [begin] -->
+<a href="http://support.huawei.com/huaweiconnect/enterprise/space-uid-87549.html" target="_blank" class="xi2">SeeSee地球       						
+</a>
+&nbsp;<em style="color: #fa6414;">
+初出茅庐</em>&nbsp;
+                    <img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/H.gif" title="华为人" style="margin-top: 5px;">
+                    <!--楼主帖，显示回复该主题的最新时间；其他的回复贴，只需要自身的发帖时间即可-->
+                    <em id="authorposton1340841">发表于 2015-1-23 15:42:00</em>
+                    <!--<em class="fmty">来自：</em>-->
+<p>
+                    <em> 最新回复：2015-03-12 18:50:45</em></p>
+                            
+                    <!--[TODO] 显示“‘作者’发表于‘什么时间’” [end] -->
+                    
+                	</div>
+                	                    <!--[TODO]显示“楼主”  [begin] -->
+<!--[TODO] 显示“只看该作者”或“显示全部楼层” [begin] -->
+<div class="author03">
+<a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=viewthread&amp;tid=327537&amp;page=1&amp;authorid=87549" rel="nofollow" class="only">只看该作者</a>
+                                        <span class="floor">
+                    <a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=viewthread&amp;tid=327537" id="postnum1340841" onclick="setCopy(this.href, &#39;帖子地址复制成功&#39;);return false;" style="color:#fff;">
+<sup>楼主</sup></a></span><br>
+                    <div class="thread-t">
+      <span class="tongji01">7763</span>
+      <span class="tongji02">1</span>
+     </div>
+                    </div>
+                    
+<!--[TODO] 显示“只看该作者”或“显示全部楼层” [end] -->
+                <!--[TODO]显示“楼主” [end] -->
+                                
+</div>
+</div>
+
+<!--显示一条线  -->
+<div class="thread-line"></div>
+
+<div class="xiangxi_text">
+                 <style type="text/css">.pcb{margin-right:0}</style><style>
+.pcb table{table-layout:auto;}
+div#jdc_suspicious_threads{
+background: #fcf5d8;
+text-align: center;
+font-size: 12px;
+}
+</style>
+<div class="pcb post_327537_1340841" id="post_327537_1340841">
+    <!--[TODO]执行此分支 -->
+<!--MODIFY-WP 屏蔽内容可见性 T756-->
+ 
+        <!--[TODO]执行此分支 -->
+<div class="t_fsz"> <!--[TODO]class="t_fsz" -->
+            <!--[TODO]执行此分支 -->
+                <!--[TODO]帖子的文字内容 [begin] -->
+<table cellspacing="0" cellpadding="0"><tbody><tr><td class="t_f" id="postmessage_1340841">
+<h2 style="TEXT-INDENT: 0cm; MARGIN-LEFT: 0cm; tab-stops: 21.0pt" align="center"><span>Zookeeper</span><span style="FONT-FAMILY: 黑体">在</span><span>HBase</span><span style="FONT-FAMILY: 黑体">中的应用</span></h2>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HBase</span><span style="FONT-FAMILY: 宋体">部署相对是一个较大的动作，其依赖于</span><span>zookeeper cluster,hadoop HDFS</span><span style="FONT-FAMILY: 宋体">。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="LAYOUT-GRID-MODE: both"><img alt="http://images.cnblogs.com/cnblogs_com/reckzhou/201203/201203221739575422.jpg" width="590" height="393" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/54c1fb276c6db.jpg"></span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zookeeper</span><span style="FONT-FAMILY: 宋体">作用在于：</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1</span><span style="FONT-FAMILY: 宋体">、</span><span>hbase regionserver </span><span style="FONT-FAMILY: 宋体">向</span><span>zookeeper</span><span style="FONT-FAMILY: 宋体">注册，提供</span><span>hbase regionserver</span><span style="FONT-FAMILY: 宋体">状态信息（是否在线）。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2</span><span style="FONT-FAMILY: 宋体">、</span><span>hmaster</span><span style="FONT-FAMILY: 宋体">启动时候会将</span><span>hbase</span><span style="FONT-FAMILY: 宋体">系统表</span><span>-ROOT- </span><span style="FONT-FAMILY: 宋体">加载到</span><span> zookeeper cluster</span><span style="FONT-FAMILY: 宋体">，通过</span><span>zookeeper cluster</span><span style="FONT-FAMILY: 宋体">可以获取当前系统表</span><span>.META.</span><span style="FONT-FAMILY: 宋体">的存储所对应的</span><span>regionserver</span><span style="FONT-FAMILY: 宋体">信息。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>zookeeper</span><span style="FONT-FAMILY: 宋体">是</span><span>hbase</span><span style="FONT-FAMILY: 宋体">集群的</span><span>"</span><b><span style="FONT-FAMILY: 宋体; COLOR: #c00000">协调器</span></b><span>"</span><span style="FONT-FAMILY: 宋体">。由于</span><span>zookeeper</span><span style="FONT-FAMILY: 宋体">的轻量级特性，因此我们可以将多个</span><span>hbase</span><span style="FONT-FAMILY: 宋体">集群共用一个</span><span>zookeeper</span><span style="FONT-FAMILY: 宋体">集群，以节约大量的服务器。多个</span><span>hbase</span><span style="FONT-FAMILY: 宋体">集群共用</span><span>zookeeper</span><span style="FONT-FAMILY: 宋体">集群的方法是使用同一组</span><span>ip</span><span style="FONT-FAMILY: 宋体">，修改不同</span><span>hbase</span><span style="FONT-FAMILY: 宋体">集群的</span><span>"zookeeper.znode.parent"</span><span style="FONT-FAMILY: 宋体">属性，让它们使用不同的根目录。比如</span><span>cluster1</span><span style="FONT-FAMILY: 宋体">使用</span><span>/hbase-c1,cluster2</span><span style="FONT-FAMILY: 宋体">使用</span><span>/hbase-c2</span><span style="FONT-FAMILY: 宋体">，等等。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HMaster</span><span style="FONT-FAMILY: 宋体">主要作用在于，通过</span><span>HMaster</span><span style="FONT-FAMILY: 宋体">维护系统表</span><span>-ROOT-,.META.</span><span style="FONT-FAMILY: 宋体">，记录</span><span>regionserver</span><span style="FONT-FAMILY: 宋体">所对应</span><span>region</span><span style="FONT-FAMILY: 宋体">变化信息。此外还负责监控处理当前</span><span>hbase cluster</span><span style="FONT-FAMILY: 宋体">中</span><span>regionserver</span><span style="FONT-FAMILY: 宋体">状态变化信息。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hbase regionserver</span><span style="FONT-FAMILY: 宋体">则用于多个</span><span>/</span><span style="FONT-FAMILY: 宋体">单个维护</span><span>region</span><span style="FONT-FAMILY: 宋体">。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;region</span><span style="FONT-FAMILY: 宋体">则对应为</span><span>hbase</span><span style="FONT-FAMILY: 宋体">数据表的表分区数据维护。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">参考：</span><span>http://koven2049.iteye.com/blog/1150484 </span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<h2 style="TEXT-INDENT: 0cm; MARGIN-LEFT: 0cm; tab-stops: 21.0pt"><span>hbase.zookeeper.zookeeperwatcher.java </span><span style="FONT-FAMILY: 黑体">类</span></h2>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="COLOR: black">ZooKeeper Watcher.<span>&nbsp; </span>One instance of this is instantiated for each Master, RegionServer, and client process.</span><span> </span><span style="FONT-FAMILY: 宋体; COLOR: black">每一个</span><span style="COLOR: black">Master</span><span style="FONT-FAMILY: 宋体; COLOR: black">、</span><span style="COLOR: black">RS</span><span style="FONT-FAMILY: 宋体; COLOR: black">和客户端进程都会创建一个</span><span style="COLOR: black">zookeeperwatcher</span><span style="FONT-FAMILY: 宋体; COLOR: black">的实例。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: -18pt; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="COLOR: black"><span>1、</span></span><span style="FONT-FAMILY: 宋体; COLOR: black">初始化</span><span style="COLOR: black">ZooKeeper</span><span style="FONT-FAMILY: 宋体; COLOR: black">连接和</span><span style="COLOR: black">watcher</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 0cm; MARGIN: 0cm 0cm 0pt 21.3pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="COLOR: black"><span>①<span style="FONT: 7pt &#39;Times New Roman&#39;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span style="FONT-FAMILY: 宋体; COLOR: black">设置节点名称</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 0cm; MARGIN: 0cm 0cm 0pt 21.3pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="COLOR: black"><span>②<span style="FONT: 7pt &#39;Times New Roman&#39;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span style="COLOR: black">ZKUtil.connet</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 0cm; MARGIN: 0cm 0cm 0pt 21.3pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="COLOR: black"><span>③<span style="FONT: 7pt &#39;Times New Roman&#39;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span style="FONT-FAMILY: 宋体; COLOR: black">如果连接成功，则新建一些节点，如</span><span style="COLOR: black">ZKUtil.createAndFailSilent(this, baseZNode); </span><span style="FONT-FAMILY: 宋体; COLOR: black">如果节点存在，则不再创建。不加</span><span style="COLOR: black">watch</span><span style="FONT-FAMILY: 宋体; COLOR: black">。此处创建的是持久性节点，并具有</span><span style="COLOR: black">open access</span><span style="FONT-FAMILY: 宋体; COLOR: black">性。</span></p>
+<h3 style="TEXT-INDENT: 0cm; MARGIN-LEFT: 0cm; tab-stops: 21.0pt"><span>HBase</span><span style="FONT-FAMILY: 黑体">中的</span><span>znode</span></h3>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>/hbase<span>&nbsp;&nbsp; </span><span style="COLOR: #984806">baseZNode</span></span></p>
+<table style="BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; BORDER-COLLAPSE: collapse; BORDER-TOP: medium none; BORDER-RIGHT: medium none" border="1" cellspacing="0" cellpadding="0">
+  <tbody>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="COLOR: #984806">Node name (fault)</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">节点分类</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt">&nbsp;</p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">ZookeeperWatcher</span><span style="FONT-FAMILY: 宋体; COLOR: #984806">初始化时创建</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>/hbase </span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">baseZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">集群的根</span><span style="COLOR: #984806">znode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">√</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/root-region-server</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">rootServerZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">包含</span><span style="COLOR: #984806">-ROOT- region</span><span style="FONT-FAMILY: 宋体; COLOR: #984806">的服务器位置的节点</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt">&nbsp;</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/rs</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">rsZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">RS</span><span style="FONT-FAMILY: 宋体; COLOR: #984806">的临时节点</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">√</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/draining</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">drainingZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">draining RS </span><span style="FONT-FAMILY: 宋体; COLOR: #984806">临时节点</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">√</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/master</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">masterAddressZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">currently active master</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">在</span><span style="COLOR: #984806">hbase.master.Hmaster</span><span style="FONT-FAMILY: 宋体; COLOR: #984806">中创建</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/backup-masters</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">backupMasterAddressesZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">backup master directory, if not the active master</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">√</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/shutdown</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">clusterStateZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">znode containing the current cluster state</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806"><span>&nbsp;</span></span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/unassigned</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">assignmentZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">region transitioning and assignment</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">√在<span>rs</span>启动时会创建该节点的子节点。<span>ZKAssign</span>会操作此节点，并创建子节点来指示<span>rs</span>的状态。</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/table</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">tableZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">table disabling/enabling</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">√</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/hbaseid</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">clusterIdZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">containing the unique cluster ID</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt">&nbsp;</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 4cm; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="151">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span>/hbase/splitlog</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 118.8pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="158">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">splitLogZNode</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 105.3pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="140">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="COLOR: #984806">log splitting work assignment</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 88.6pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="118">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt"><span style="FONT-FAMILY: 宋体; COLOR: #984806">√</span></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 47.25pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>ZooKeeperWatcher</span><span style="FONT-FAMILY: 宋体">的构造函数的作用就是初始化一个</span><span>ZooKeeper</span><span style="FONT-FAMILY: 宋体">连接并设置</span><span>watcher</span><span style="FONT-FAMILY: 宋体">。因此在</span><span>ZookeeperWatcher</span><span style="FONT-FAMILY: 宋体">初始化时创建的节点，表示只要</span><span>HBase</span><span style="FONT-FAMILY: 宋体">在连接</span><span>ZooKeeper</span><span style="FONT-FAMILY: 宋体">时就会创建这些节点。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: -21pt; MARGIN: 0cm 0cm 0pt 21pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span>1、<span style="FONT: 7pt &#39;Times New Roman&#39;">&nbsp; </span></span></span><span>/hbase</span><span style="FONT-FAMILY: 宋体">的子节点：</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="LAYOUT-GRID-MODE: both"><img border="0" width="554" height="19" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/54c1fb27835a1.jpg"></span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: -21pt; MARGIN: 0cm 0cm 0pt 21pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span>2、<span style="FONT: 7pt &#39;Times New Roman&#39;">&nbsp; </span></span></span><span>HBase</span><span style="FONT-FAMILY: 宋体">中的</span><span>list</span><span style="FONT-FAMILY: 宋体">命令和</span><span>/hbase/table</span><span style="FONT-FAMILY: 宋体">下的子节点对比：前者不包括</span><span>-ROOT-</span><span style="FONT-FAMILY: 宋体">和</span><span>.META.</span><span style="FONT-FAMILY: 宋体">表：</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="LAYOUT-GRID-MODE: both"><img border="0" width="554" height="167" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/54c1fb278df44.jpg"></span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: -21pt; MARGIN: 0cm 0cm 0pt 21pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span>3、<span style="FONT: 7pt &#39;Times New Roman&#39;">&nbsp; </span></span></span><span style="FONT-FAMILY: 宋体">启动</span><span>HBase</span><span style="FONT-FAMILY: 宋体">时，</span><span>/hbase/unassigned</span><span style="FONT-FAMILY: 宋体">节点的变化：</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="LAYOUT-GRID-MODE: both"><img border="0" width="554" height="158" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/54c1fb279d798.jpg"></span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<h2 style="TEXT-INDENT: 0cm; MARGIN-LEFT: 0cm; tab-stops: 21.0pt"><span>ZooKeeperListener.java</span></h2>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><b><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">package</span></b><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> org.apache.hadoop.hbase.zookeeper;</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">抽象类，实现</span><span>HBase</span><span style="FONT-FAMILY: 宋体">内部</span><span>ZooKeeper</span><span style="FONT-FAMILY: 宋体">事件的监听。</span><span>ZooKeeperWatcher</span><span style="FONT-FAMILY: 宋体">会执行适当的方法来实现该类。为了从</span><span>watcher</span><span style="FONT-FAMILY: 宋体">接收到事件，每个监听者必须要通过</span><span>ZooKeeperWatcher</span><span style="FONT-FAMILY: 宋体">注册。子类需要重写需要的方法。值得注意的是监听者的</span><span>watcher</span><span style="FONT-FAMILY: 宋体">在执行这些方法时会引起阻塞，因此不能长期运行这些方法。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">在构造函数中就初始化了一个</span><span>ZooKeeperWatcher</span><span style="FONT-FAMILY: 宋体">。</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">监听的事件包括</span><span>nodeCreated(String path)</span><span style="FONT-FAMILY: 宋体">、</span><span>nodeDeleted(String path)</span><span style="FONT-FAMILY: 宋体">、</span><span>nodeDataChanged(String path)</span><span style="FONT-FAMILY: 宋体">、</span><span>nodeChildrenChanged(String path)</span><span style="FONT-FAMILY: 宋体">。</span></p>
+<h2 style="TEXT-INDENT: 0cm; MARGIN-LEFT: 0cm; tab-stops: 21.0pt"><span>ActiveMasterManager.java</span></h2>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">作用：处理所有</span><span>master</span><span style="FONT-FAMILY: 宋体">方面的</span><span>master</span><span style="FONT-FAMILY: 宋体">选举的事务。监听并回应</span><span>master znode</span><span style="FONT-FAMILY: 宋体">的</span><span>zookeeper</span><span style="FONT-FAMILY: 宋体">通知，包括</span><span>nodeCreated(</span><span style="FONT-FAMILY: 宋体">节点创建</span><span>)</span><span style="FONT-FAMILY: 宋体">和</span><span>nodeDeleted(</span><span style="FONT-FAMILY: 宋体">节点删除</span><span>)</span><span style="FONT-FAMILY: 宋体">。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">包含阻断方法，备</span><span>master</span><span style="FONT-FAMILY: 宋体">等待主</span><span>master</span><span style="FONT-FAMILY: 宋体">失败。？</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">在</span><span>HMaster</span><span style="FONT-FAMILY: 宋体">构造函数的</span><span>blockUntilBecomingActiveMaster</span><span style="FONT-FAMILY: 宋体">方法中实例化该类。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">实现了抽象类</span><span>ZooKeeperListener</span><span style="FONT-FAMILY: 宋体">中的</span><span>nodeCreated(</span><span style="FONT-FAMILY: 宋体">节点创建</span><span>)</span><span style="FONT-FAMILY: 宋体">和</span><span>nodeDeleted(</span><span style="FONT-FAMILY: 宋体">节点删除</span><span>)</span><span style="FONT-FAMILY: 宋体">方法。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<h2 style="TEXT-INDENT: 0cm; MARGIN-LEFT: 0cm; tab-stops: 21.0pt"><span>HBase</span><span style="FONT-FAMILY: 黑体">中使用</span><span>zookeeper</span><span style="FONT-FAMILY: 黑体">的场景（未完）</span></h2>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>1</span><span style="FONT-FAMILY: 宋体">、主备</span><span>master</span><span style="FONT-FAMILY: 宋体">切换时</span></p>
+<table style="BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; BORDER-COLLAPSE: collapse; BORDER-TOP: medium none; BORDER-RIGHT: medium none" border="1" cellspacing="0" cellpadding="0">
+  <tbody>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 69.2pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="92">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">应用场景</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 120.5pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="161">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">使用类</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 201.45pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="269">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">调用函数</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 34.95pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: windowtext 1pt solid; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="47">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">备注</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 69.2pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="92">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>Master</span><span style="FONT-FAMILY: 宋体">启动</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 120.5pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="161">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;;: silver; COLOR: black">HMaster</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 201.45pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="269">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;;: silver; COLOR: black">HMaster</span><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: 宋体; COLOR: black">（构造函数）</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 34.95pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="47">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">连接</span><span>zookeeper</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 69.2pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="92">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">主备</span><span>master</span><span style="FONT-FAMILY: 宋体">切换</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 120.5pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="161">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;;: silver; COLOR: black">HMaster</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 201.45pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="269">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><u><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;;: silver; COLOR: black">becomeActiveMaster</span></u><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black">(MonitoredTask startupStatus)</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 34.95pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="47">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">注册一个</span><span>Listener</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: windowtext 1pt solid; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 69.2pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="92">
+      <table style="BORDER-COLLAPSE: collapse" border="0" cellspacing="0" cellpadding="0" width="128">
+        <tbody>
+          <tr style="HEIGHT: 42pt">
+            <td style="PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 96pt; PADDING-RIGHT: 5.4pt; HEIGHT: 42pt; PADDING-TOP: 0cm" width="128">
+            <p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ideograph-numeric; FONT-SIZE: 12pt"><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: 宋体; COLOR: black; FONT-SIZE: 11pt">client</span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: 宋体; COLOR: black; FONT-SIZE: 11pt">连接<span>HBase</span></span></p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 120.5pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="161">
+      <table style="BORDER-COLLAPSE: collapse" border="0" cellspacing="0" cellpadding="0" width="497">
+        <tbody>
+          <tr style="HEIGHT: 42pt">
+            <td style="PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 115pt; PADDING-RIGHT: 5.4pt; HEIGHT: 42pt; PADDING-TOP: 0cm" width="153">
+            <p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ideograph-numeric; FONT-SIZE: 12pt"><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: 宋体; COLOR: black; FONT-SIZE: 11pt">HConnectionManager</span></p>
+            </td>
+            <td style="PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 162pt; PADDING-RIGHT: 5.4pt; HEIGHT: 42pt; PADDING-TOP: 0cm" width="216"></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 201.45pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="269">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>HConnectionImplementation</span></p>
+      </td>
+      <td style="BORDER-BOTTOM: windowtext 1pt solid; BORDER-LEFT: medium none; PADDING-BOTTOM: 0cm; PADDING-LEFT: 5.4pt; WIDTH: 34.95pt; PADDING-RIGHT: 5.4pt; BORDER-TOP: medium none; BORDER-RIGHT: windowtext 1pt solid; PADDING-TOP: 0cm" valign="top" width="47">
+      <p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">（见</span><span>hbase.zookeeper</span><span style="FONT-FAMILY: 宋体">源码</span><span>-Bene.xlsx</span><span style="FONT-FAMILY: 宋体">中的</span><span>sheet2</span><span style="FONT-FAMILY: 宋体">）</span></p>
+<h2 style="TEXT-INDENT: 0cm; MARGIN-LEFT: 0cm; tab-stops: 21.0pt"><span>Zookeeper</span><span style="FONT-FAMILY: 黑体">交流遗留问题</span></h2>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 21pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>1</span><span><span style="FONT-FAMILY: 宋体">、</span><span>Follower</span></span><span><span style="FONT-FAMILY: 宋体">和</span><span>Observer</span></span><span style="FONT-FAMILY: 宋体">能否写数据，二者主要区别是什么？</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 0cm; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;&nbsp;&nbsp; </span>ObserverRequestProcessor</span></span><span><span style="FONT-FAMILY: 宋体">会将收到的任何修改状态的请求都发送给</span><span>leader</span></span><span><span style="FONT-FAMILY: 宋体">。遇到以下操作时，</span><span>observer</span></span><span><span style="FONT-FAMILY: 宋体">和</span><span>follower</span></span><span><span style="FONT-FAMILY: 宋体">都会发送请求给</span><span>leader</span></span></p>
+<p style="LINE-HEIGHT: normal; TEXT-INDENT: 21pt; MARGIN: 0cm 0cm 0pt 42pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">switch</span></b></span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> (request.type) {</span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.sync:</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><u><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #0000c0">zks</span></u></span><span><u><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black">.</span></u></span><span><u><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #0000c0">pendingSyncs</span></u></span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black">.add(request);</span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #0000c0">zks</span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black">.getFollower().<span style="BACKGROUND: yellow">request(request)</span>;</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 122.25pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;">//<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="COLOR: #0000c0">zks</span><span style="COLOR: black">.getObserver().<span style="BACKGROUND: blue">request(request)</span>;</span></span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">break</span></b></span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black">;</span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.create:</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.delete:</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.setData:</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.setACL:</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.createSession:</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.closeSession:</span></span></p>
+<p style="LINE-HEIGHT: normal; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span><b><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #7f0055">case</span></b></span><span><span style="LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"> <u>OpCode</u>.multi:</span></span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 0cm; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #0000c0">zks</span><span><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black">.getFollower().<span style="BACKGROUND: yellow">request(request)</span>;</span></span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 0cm; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt; tab-stops: 132.0pt"><span><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: #0000c0">//<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>zks</span></span><span><span style="LINE-HEIGHT: 150%; LAYOUT-GRID-MODE: both; FONT-FAMILY: &#39;Courier New&#39;; COLOR: black">.getObserver().<span style="BACKGROUND: blue">request(request)</span>;</span></span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="FONT-FAMILY: 宋体">主要区别：</span><span>Observer</span></span><span><span style="FONT-FAMILY: 宋体">不参与</span><span>leader</span></span><span style="FONT-FAMILY: 宋体">选举和投票。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>Follower</span><span><span style="FONT-FAMILY: 宋体">可以写数据，</span><span>Observer</span></span><span><span style="FONT-FAMILY: 宋体">在客户端写数据时不参与，主要通过</span><span>sync</span></span><span style="FONT-FAMILY: 宋体">操作更新数据。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;</span><span><span style="FONT-FAMILY: 宋体">二者的主要区别是</span><span>Follower</span></span><span><span style="FONT-FAMILY: 宋体">参与选举和投票，</span><span>Observer</span></span><span style="FONT-FAMILY: 宋体">不参与选举和投票。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp; </span><span><span style="FONT-FAMILY: 宋体">投票在写数据过程中的作用：客户端发送写数据操作时，</span><span>follower</span></span><span><span style="FONT-FAMILY: 宋体">或者</span><span>Observer</span></span><span><span style="FONT-FAMILY: 宋体">将写数据请求转发给</span><span>leader</span></span><span><span style="FONT-FAMILY: 宋体">，然后</span><span>leader</span></span><span><span style="FONT-FAMILY: 宋体">发送给具有投票权（也就是</span><span>follower</span></span><span><span style="FONT-FAMILY: 宋体">和</span><span>leader</span></span><span><span style="FONT-FAMILY: 宋体">）的角色；当这些节点有半数以上的节点反馈给</span><span>leader</span></span><span><span style="FONT-FAMILY: 宋体">投票，</span><span>leader</span></span><span style="FONT-FAMILY: 宋体">则认为写数据成功。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>observer</span><span><span style="FONT-FAMILY: 宋体">是</span><span>zookeeper-3.3</span></span><span><span style="FONT-FAMILY: 宋体">版本新添加的一个角色</span><span>,</span></span><span><span style="FONT-FAMILY: 宋体">，他们的引入是为了解决</span><span>zookeeper</span></span><span><span style="FONT-FAMILY: 宋体">集群扩大后，由于网络可靠性下降可能导致的<b><span style="COLOR: #c00000">拜占庭将军</span></b>问题。</span></span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 21pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>2</span><span style="FONT-FAMILY: 宋体">、写数据的原子性如何保证？</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 21pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>ZooKeeper</span><span style="FONT-FAMILY: 宋体">中读写数据都具有原子性。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 18pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span style="FONT-FAMILY: 宋体">读数据的原子性是指读某个节点的数据时，会将该节点所有的数据都返回给客户端。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 18pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="FONT-FAMILY: 宋体">写数据的原子性是指写数据不会部分失败或部分成功。一个成功的写操作必须保证被写入到<b>大部分</b></span><b><span>zookeeper</span></b></span><span><b><span style="FONT-FAMILY: 宋体">服务器</span></b></span><span style="FONT-FAMILY: 宋体">的永久存储上（不是上次说的所有服务器）。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt">&nbsp;</p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 21pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>3</span><span><span style="FONT-FAMILY: 宋体">、</span><span>/hbase/rs</span></span><span style="FONT-FAMILY: 宋体">节点的子节点是持久节点还是临时节点？</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span><b><span style="FONT-FAMILY: 宋体">临时节点</span></b></span><span><span style="FONT-FAMILY: 宋体">。可以通过在</span><span>shell</span></span><span><span style="FONT-FAMILY: 宋体">脚本查看</span><span>/hbase/rs</span></span><span><span style="FONT-FAMILY: 宋体">节点的数据及其子节点的数据，</span><span>/hbase/rs</span></span><span style="FONT-FAMILY: 宋体">是持久节点，其子节点是临时节点，二者如下图。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>/hbase/rs</span></span><span style="FONT-FAMILY: 宋体">是持久节点：</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt 18pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span><span style="LAYOUT-GRID-MODE: both"><img border="0" width="435" height="217" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/54c1fb27abc4d.gif"></span></span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 18pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;&nbsp; </span><span><span style="FONT-FAMILY: 宋体">这个</span><span>znode[linux-jay1.jay,20020,1345715787547]</span></span><span><span style="FONT-FAMILY: 宋体">是个临时</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">，当该</span><span>regionserver</span></span><span><span style="FONT-FAMILY: 宋体">关闭后，这个</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">会消失，那么设置了</span><span>watcher</span></span><span><span style="FONT-FAMILY: 宋体">的</span><span>master</span></span><span><span style="FONT-FAMILY: 宋体">就会第一时间感知到</span><span>regionserver</span></span><span style="FONT-FAMILY: 宋体">的退出。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 18pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="LAYOUT-GRID-MODE: both"><img border="0" width="558" height="170" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/54c1fb27b817b.gif"></span></span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 21pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="FONT-FAMILY: 宋体">备注：如果是持久节点</span><span>ephemeralOwner </span></span><span><span style="FONT-FAMILY: 宋体">的值为</span><span>0</span></span><span style="FONT-FAMILY: 宋体">。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 18pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>Get</span><span style="FONT-FAMILY: 宋体">的各个参数解释：</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>czxid : The zxid of the change that caused this znode to be created.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>mzxid : The zxid of the change that last modified this znode.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>ctime : The time in milliseconds from epoch when this znode was created.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>mtime : The time in milliseconds from epoch when this znode was last modified.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>version : The number of changes to the data of this znode.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>cversion : The number of changes to the children of this znode.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>aversion : The number of changes to the ACL of this znode</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>ephemeralOwner : The session id of the owner of this znode if the znode is an ephemeral node. If it is not an ephemeral node, it will be zero.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>dataLength : The length of the data field of this znode.</span></p>
+<p style="LINE-HEIGHT: 150%; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>numChildren : The number of children of this znode.</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>4</span><span><span style="FONT-FAMILY: 宋体">、</span><span>sync</span></span><span style="FONT-FAMILY: 宋体">操作的作用是什么？</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>sync</span><span><span style="FONT-FAMILY: 宋体">操作的作用是使客户端的</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">视图与</span><span>ZooKeeper</span></span><span><span style="FONT-FAMILY: 宋体">同步，由于读操作可能会存在连接的某台</span><span>zookeeper</span></span><span><span style="FONT-FAMILY: 宋体">服务器上的数据并不是最新数据，因此</span><span>zookeeper</span></span><span><span style="FONT-FAMILY: 宋体">允许客户端用</span><span>sync</span></span><span><span style="FONT-FAMILY: 宋体">操作自身更新（如何实现涉及到</span><span>ZooKeeper</span></span><span style="FONT-FAMILY: 宋体">内核，目前还没有看这部分内容）。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>5</span><span><span style="FONT-FAMILY: 宋体">、</span><span>watcher</span></span><span style="FONT-FAMILY: 宋体">的设置是一次性的，为什么要如此设计？</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>Watch</span><span><span style="FONT-FAMILY: 宋体">是由</span><span>ZooKeeper</span></span><span><span style="FONT-FAMILY: 宋体">服务的操作来设置，同时由服务的其他操作来触发，</span><span>watcher</span></span><span><span style="FONT-FAMILY: 宋体">只被触发一次。比如一个客户端对某个</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">调用了</span><span>exists</span></span><span><span style="FONT-FAMILY: 宋体">操作并在这个节点上加了一个</span><span>Watch</span></span><span><span style="FONT-FAMILY: 宋体">，如果该节点不存在，则</span><span>exists</span></span><span><span style="FONT-FAMILY: 宋体">操作返回</span><span>false</span></span><span><span style="FONT-FAMILY: 宋体">。如果一段时间后，这个</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">被另外一个客户端创建了，该</span><span>Watch</span></span><span><span style="FONT-FAMILY: 宋体">将被触发，通知第一台客户端</span><span>znode</span></span><span style="FONT-FAMILY: 宋体">被创建的消息。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="FONT-FAMILY: 宋体">由于是针对操作而设置的，因此很容易区别上次交流时所说的状态。</span><span><span>&nbsp;&nbsp;&nbsp; </span>ZooKeeper</span></span><span><span style="FONT-FAMILY: 宋体">在读操作</span><span>exists</span></span><span><span style="FONT-FAMILY: 宋体">、</span><span>getChildren</span></span><span><span style="FONT-FAMILY: 宋体">、</span><span>getData</span></span><span><span style="FONT-FAMILY: 宋体">时设置</span><span>watch</span></span><span><span style="FONT-FAMILY: 宋体">，这些操作都由写操作</span><span>create</span></span><span><span style="FONT-FAMILY: 宋体">、</span><span>delete</span></span><span><span style="FONT-FAMILY: 宋体">和</span><span>setData</span></span><span style="FONT-FAMILY: 宋体">来触发。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>&nbsp;</span><span><span style="FONT-FAMILY: 宋体">如此看来，并不是所有的操作都会触发</span><span>watch</span></span><span><span style="FONT-FAMILY: 宋体">，也并不是所有的操作都会设置</span><span>watch</span></span><span><span style="FONT-FAMILY: 宋体">。而且通过</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">的路径可以确定是哪个</span><span>znode</span></span><span style="FONT-FAMILY: 宋体">发生了改变，通过操作的类型可以确定该节点发生了何种改变。个人认为这样设置的确增加了通用性，同时也减少了资源消耗。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24.1pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><b><span style="FONT-FAMILY: 宋体">另外</span></b></span><span style="FONT-FAMILY: 宋体">：</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span>ZooKeeper</span><span><span style="FONT-FAMILY: 宋体">提供配置服务的手段是：用</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">的路径来记录键，用</span><span>znode</span></span><span><span style="FONT-FAMILY: 宋体">的数据来存储值，因此正好可以使用</span><span>znode</span></span><span style="FONT-FAMILY: 宋体">来存储键值对。</span></p>
+<p style="LINE-HEIGHT: 150%; TEXT-INDENT: 24pt; MARGIN: 0cm 0cm 0pt; LAYOUT-GRID-MODE: line; FONT-FAMILY: &#39;Times New Roman&#39;,&#39;serif&#39;; TEXT-AUTOSPACE: ; FONT-SIZE: 12pt"><span><span style="FONT-FAMILY: 宋体">比如，</span><span>/hbase/root-region-server</span></span><span><span style="FONT-FAMILY: 宋体">的路径表示存储的是</span><span>-ROOT-</span></span><span><span style="FONT-FAMILY: 宋体">表所在服务器的地址，然后用该</span><span>znode</span></span><span style="FONT-FAMILY: 宋体">的值来存储其地址值</span></p></td></tr></tbody></table>
+                <!--[TODO]帖子的文字内容 [end] -->
+
+
+</div>
+
+        <!--[TODO]执行此分支，但页面上没有看出来在哪里 -->
+<div id="post_rate_div_1340841"></div>
+<script type="text/javascript">var auc_list_tmp = $('auc_list_tmp');if(auc_list_tmp !== null){document.write(auc_list_tmp.innerHTML);auc_list_tmp.innerHTML='';}
+function lalala(){
+	ajaxget('plugin.php?id=auction:involve&operation=view&tid=327537&page=1', 'list_ajax');
+	$('list_ajax').style.display = 'block';
+}
+if($('list_ajax')){setTimeout('lalala()', 1000);}
+</script></div>
+</div>
+
+            <!--[TODO]不执行此分支 -->
+</td></tr>
+    <!--[TODO]右侧框（帖子信息） [end] -->
+
+<tr id="_postposition1340841"></tr>
+<!--[TODO]右侧框，显示"回复、编辑、推送" [begin] -->
+<tr>
+<td style="overflow:visible;width:100%">
+<!--收藏、评分、分享、顶、踩  -->  
+<div id="p_btn" class="mbm hm cl">
+<a href="http://support.huawei.com/huaweiconnect/enterprise/home.php?mod=spacecp&amp;ac=favorite&amp;type=thread&amp;id=327537" id="k_favorite" onclick="showWindow(this.id, this.href, &#39;get&#39;, 0);">
+<i>
+<img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/fav_grey.gif" alt="收藏">
+收藏&nbsp;(0)
+</i>
+</a>
+<a class="sharep" href="http://support.huawei.com/huaweiconnect/enterprise/home.php?mod=spacecp&amp;ac=share&amp;type=thread&amp;id=327537" onclick="showWindow(&#39;sharethread&#39;, this.href, &#39;get&#39;, 0);" title="分享推精华"><i><img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/oshr.png" alt="分享">分享</i></a>
+<a id="recommend_add" href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=misc&amp;action=recommend&amp;do=add&amp;tid=327537&amp;hash=a0c9806a" onclick="showWindow(&#39;login&#39;, this.href)" onmouseover="this.title = $(&#39;recommendv_add&#39;).innerHTML + &#39; 人顶&#39;" title="顶一下"><i><img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/rec_add.gif" alt="顶">顶<span id="recommendv_add" style="display:none">0</span></i></a>
+</div>
+
+<div class="po hin">
+<!--点评、回复、支持、反对  -->
+<div class="pob cl">
+<em>
+<a class="cmmnt" href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=misc&amp;action=comment&amp;tid=327537&amp;pid=1340841&amp;extra=page%3D&amp;page=1" onclick="showWindow(&#39;comment&#39;, this.href, &#39;get&#39;, 0)">点评</a>
+<a class="fastre" href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=post&amp;action=reply&amp;fid=783&amp;tid=327537&amp;reppost=1340841&amp;extra=page%3D&amp;page=1" onclick="showWindow(&#39;reply&#39;, this.href)">回复</a>
+</em>
+
+<p>
+<a href="javascript:;" onclick="showWindow(&#39;miscreport1340841&#39;, &#39;misc.php?mod=report&amp;rtype=post&amp;rid=1340841&amp;tid=327537&amp;fid=783&#39;, &#39;get&#39;, -1);return false;">报告</a>
+</p>
+
+</div>
+</div>
+
+<!--点评记录 -->
+    <div class="xiangxi_dianping"> 
+<div id="comment_1340841" class="cm">
+</div>
+</div></td>
+</tr>
+
+<!--整个显示"收藏、评分、支持/反对"-->
+<tr>
+<td class="plm">
+    <!--帖子信息-电梯直达  -->
+<div id="fj" class="y mrb5">
+<label class="z">电梯直达</label>
+<input type="text" class="px p_fre z" size="2" onkeyup="$(&#39;fj_btn&#39;).href=&#39;forum.php?mod=redirect&amp;ptid=327537&amp;authorid=0&amp;postno=&#39;+this.value" onkeydown="if(event.keyCode==13) {window.location=$(&#39;fj_btn&#39;).href;return false;}" title="跳转到指定楼层">
+<a href="javascript:;" id="fj_btn" class="z" title="跳转到指定楼层"><img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/fj_btn.png" alt="跳转到指定楼层" class="vm"></a>
+</div>
+
+</td>
+<!--xiangxi_pinglun2 end -->
+</tr>
+<!--[TODO]右侧框，显示"回复、编辑、推送" [end] -->
+
+<!--[TODO]显示一条线，没有具体内容[begin] -->
+<tr class="ad">
+
+</tr>
+<!--[TODO]显示一条线，没有具体内容[end] -->
+
+</tbody></table>
+
+                    
+<script type="text/javascript">
+_obj = null;
+function modifyAuditing(obj,status,sort,id,pid,fid){
+_obj = obj;
+var reason = '';
+if(status==2){
+//			modimageaction('banpostImage',id);
+//			return ;
+showWindow(1,'forum.php?mod=modifyStatus&action=blocked&status='+status+'&sort='+sort+'&id='+id+'&pid='+pid+'&fid='+fid,'get');
+return;
+}
+url = "forum.php";
+jQuery.ajax({
+type:"post",
+url:url,
+data:{
+"mod":"modifyStatus",
+"status":status,
+"sort":sort,
+"id":id,
+"pid":pid,
+"reason":reason
+},
+dataType:"json",
+success:function(response){
+if(response.status=='success'){
+jQuery(response.img).insertBefore(jQuery(obj).parent());
+//jQuery(obj).parent().prev().prev().remove();
+jQuery(obj).parent().parent().find("img").eq(sort-1).remove();
+jQuery(obj).parent().remove();
+}
+},
+error:function(){
+alert("网络有问题！请稍后重试！");
+}
+})
+}
+function hideOpenedWindow(name,status,sort,id,pid,fid){
+var reason = jQuery.trim(jQuery(":input[name='reason']").val());
+hideWindow(name);
+url = "forum.php";
+jQuery.ajax({
+type:"post",
+url:url,
+data:{
+"mod":"modifyStatus",
+"status":status,
+"sort":sort,
+"id":id,
+"pid":pid,
+"fid":fid,
+"reason":reason
+},
+dataType:"json",
+success:function(response){
+if(response.status=='success'){
+jQuery(response.img).insertBefore(jQuery(_obj).parent());
+//jQuery(obj).parent().prev().prev().remove();
+jQuery(_obj).parent().parent().find("img").eq(sort-1).remove();
+jQuery(_obj).parent().remove();
+}
+},
+error:function(){
+alert("网络有问题！请稍后重试！");
+}
+})
+}
+</script>
+</div><div id="post_1640997"><table id="pid1640997" class="plhin" summary="pid1640997" cellspacing="0" cellpadding="0">
+<tbody><tr class="ad"><td class="pls"></td></tr>
+<tr>
+    <!--[TODO]右侧框（帖子信息） [begin] -->
+<td class="plc" style="width:100%">
+        <!--[TODO]帖子信息-发表于**天前、只看见作者、只看大图 [begin] -->
+<!-- <div class="pi pd-h">  -->
+        <div class="xiangxi_author">
+            
+<!--增加最佳答案小图标-->
+                
+
+            
+<!-- <div class="pti pdh-avatar"> -->
+            <div class="pti">
+<div class="pdbt">
+</div>
+
+                <!--[TODO] 显示作者的头像 [begin] -->
+<a href="http://support.huawei.com/huaweiconnect/enterprise/space-uid-83911.html" target="_blank" class="author01" c="1" mid="card_1798"><img class="avatar" src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/noavatar_small.gif" onerror="this.onerror=null;this.src=&#39;http://support.huawei.com/huaweiconnect/enterprise/uc_server/images/noavatar_small.gif&#39;"></a>
+                <!--[TODO] 显示作者的头像 [end] -->
+
+                    
+                	<div class="author02">
+                    <!--[TODO] 显示“‘作者’发表于‘什么时间’” [begin] -->
+<a href="http://support.huawei.com/huaweiconnect/enterprise/space-uid-83911.html" target="_blank" class="xi2">DDR       						
+</a>
+&nbsp;<em style="color: #fa6414;">
+小试牛刀</em>&nbsp;
+                    <img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/H.gif" title="华为人" style="margin-top: 5px;">
+                    <!--楼主帖，显示回复该主题的最新时间；其他的回复贴，只需要自身的发帖时间即可-->
+                    <em id="authorposton1640997">发表于 2015-3-12 18:50:45</em>
+                    <!--<em class="fmty">来自：</em>-->
+<p>
+        
+                    <!--[TODO] 显示“‘作者’发表于‘什么时间’” [end] -->
+                    
+                	</p></div>
+                	                    <!--[TODO]显示“楼主”  [begin] -->
+<!--[TODO] 显示“只看该作者”或“显示全部楼层” [begin] -->
+<div class="author03">
+<a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=viewthread&amp;tid=327537&amp;page=1&amp;authorid=83911" rel="nofollow" class="only">只看该作者</a>
+                                        <span class="floor">
+                    <a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=redirect&amp;goto=findpost&amp;ptid=327537&amp;pid=1640997" id="postnum1640997" onclick="setCopy(this.href, &#39;帖子地址复制成功&#39;);return false;" style="color:#fff;">
+<sup>沙发</sup></a></span><br>
+                    </div>
+                    
+<!--[TODO] 显示“只看该作者”或“显示全部楼层” [end] -->
+                <!--[TODO]显示“楼主” [end] -->
+                                
+</div>
+</div>
+
+<!--显示一条线  -->
+<div class="xiangxi_pinglun2">	
+                 <style>
+.pcb table{table-layout:auto;}
+div#jdc_suspicious_threads{
+background: #fcf5d8;
+text-align: center;
+font-size: 12px;
+}
+</style>
+<div class="pcb post_327537_1640997" id="post_327537_1640997">
+    <!--[TODO]执行此分支 -->
+<!--MODIFY-WP 屏蔽内容可见性 T756-->
+<div class="t_fsz"> <!--[TODO]class="t_fsz" -->
+<table cellspacing="0" cellpadding="0"><tbody><tr><td class="t_f" id="postmessage_1640997">
+<p>先mark，以后学</p>
+<p><br>
+</p></td></tr></tbody></table>
+
+
+</div>
+
+        <!--[TODO]执行此分支，但页面上没有看出来在哪里 -->
+<div id="post_rate_div_1640997"></div>
+</div>
+</div>
+
+            <!--[TODO]不执行此分支 -->
+</td></tr>
+    <!--[TODO]右侧框（帖子信息） [end] -->
+
+<tr id="_postposition1640997"></tr>
+<!--[TODO]右侧框，显示"回复、编辑、推送" [begin] -->
+<tr>
+<td>
+<div class="xiangxi_pinglun2">
+<!--收藏、评分、分享、顶、踩  --><div class="po hin">
+<!--点评、回复、支持、反对  -->
+<div class="pob cl">
+<em>
+<a class="cmmnt" href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=misc&amp;action=comment&amp;tid=327537&amp;pid=1640997&amp;extra=page%3D&amp;page=1" onclick="showWindow(&#39;comment&#39;, this.href, &#39;get&#39;, 0)">点评</a>
+<a class="fastre" href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=post&amp;action=reply&amp;fid=783&amp;tid=327537&amp;repquote=1640997&amp;extra=page%3D&amp;page=1" onclick="showWindow(&#39;reply&#39;, this.href)">回复</a>
+<a class="replyadd" href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=misc&amp;action=postreview&amp;do=support&amp;tid=327537&amp;pid=1640997&amp;hash=a0c9806a" onclick="showWindow(this.id, this.href, &#39;get&#39;, 0);" onmouseover="this.title = ($(&#39;review_support_1640997&#39;).innerHTML ? $(&#39;review_support_1640997&#39;).innerHTML : 0) + &#39; 人 支持&#39;">顶 (<span id="review_support_1640997">0</span>)</a>
+</em>
+
+<p>
+<a href="javascript:;" onclick="showWindow(&#39;miscreport1640997&#39;, &#39;misc.php?mod=report&amp;rtype=post&amp;rid=1640997&amp;tid=327537&amp;fid=783&#39;, &#39;get&#39;, -1);return false;">报告</a>
+</p>
+
+</div>
+</div>
+
+<!--点评记录 -->
+    <div class="xiangxi_dianping"> 
+<div id="comment_1640997" class="cm">
+</div>
+</div></div></td>
+</tr>
+
+<!--整个显示"收藏、评分、支持/反对"-->
+<tr>
+<td class="plm plc">
+
+</td>
+<!--xiangxi_pinglun2 end -->
+</tr>
+<!--[TODO]右侧框，显示"回复、编辑、推送" [end] -->
+
+<!--[TODO]显示一条线，没有具体内容[begin] -->
+<tr class="ad">
+
+</tr>
+<!--[TODO]显示一条线，没有具体内容[end] -->
+
+</tbody></table>
+
+                    
+<script type="text/javascript">
+_obj = null;
+function modifyAuditing(obj,status,sort,id,pid,fid){
+_obj = obj;
+var reason = '';
+if(status==2){
+//			modimageaction('banpostImage',id);
+//			return ;
+showWindow(1,'forum.php?mod=modifyStatus&action=blocked&status='+status+'&sort='+sort+'&id='+id+'&pid='+pid+'&fid='+fid,'get');
+return;
+}
+url = "forum.php";
+jQuery.ajax({
+type:"post",
+url:url,
+data:{
+"mod":"modifyStatus",
+"status":status,
+"sort":sort,
+"id":id,
+"pid":pid,
+"reason":reason
+},
+dataType:"json",
+success:function(response){
+if(response.status=='success'){
+jQuery(response.img).insertBefore(jQuery(obj).parent());
+//jQuery(obj).parent().prev().prev().remove();
+jQuery(obj).parent().parent().find("img").eq(sort-1).remove();
+jQuery(obj).parent().remove();
+}
+},
+error:function(){
+alert("网络有问题！请稍后重试！");
+}
+})
+}
+function hideOpenedWindow(name,status,sort,id,pid,fid){
+var reason = jQuery.trim(jQuery(":input[name='reason']").val());
+hideWindow(name);
+url = "forum.php";
+jQuery.ajax({
+type:"post",
+url:url,
+data:{
+"mod":"modifyStatus",
+"status":status,
+"sort":sort,
+"id":id,
+"pid":pid,
+"fid":fid,
+"reason":reason
+},
+dataType:"json",
+success:function(response){
+if(response.status=='success'){
+jQuery(response.img).insertBefore(jQuery(_obj).parent());
+//jQuery(obj).parent().prev().prev().remove();
+jQuery(_obj).parent().parent().find("img").eq(sort-1).remove();
+jQuery(_obj).parent().remove();
+}
+},
+error:function(){
+alert("网络有问题！请稍后重试！");
+}
+})
+}
+</script>
+</div>    <!--[TODO]已发表和回复的帖子列表  [end] -->
+
+    <!--[TODO]不显示 [begin] -->
+<div id="postlistreply" class="pl"><div id="post_new" class="viewthread_table" style="display: none"></div></div>
+    <!--[TODO]不显示 [end] -->
+    
+</div>
+
+<div class="thread-line-green"></div>
+
+<form method="post" autocomplete="off" name="modactions" id="modactions">
+<input type="hidden" name="formhash" value="a0c9806a">
+<input type="hidden" name="optgroup">
+<input type="hidden" name="operation">
+<input type="hidden" name="listextra" value="page%3D">
+<input type="hidden" name="page" value="1">
+</form>
+
+
+<!--[TODO]显示“下一页” deleted [begin] -->
+<!--[TODO]显示“下一页” deleted [end] -->
+
+<!--[TODO]发新帖、回复、返回列表 [begin] -->
+<div class="pgs tm bm cl">
+
+    <!-- 自定义的“发帖”、“多页列表” -->
+    <div class="hbp-pager" style="padding:10px 20px;">
+                <span class="pgb y"><a href="http://support.huawei.com/huaweiconnect/enterprise/forum-783.html">返回列表</a></span>
+    </div>
+    
+    <!--[TODO]显示“发帖”、“回复” deleted [begin] -->
+        <!--[TODO]显示“发帖”、“回复” deleted [end] -->
+    
+</div>
+<!--[TODO]发新帖、回复、返回列表 [end] -->
+
+<!--[diy=diyfastposttop]--><div id="diyfastposttop" class="area"></div><!--[/diy]-->
+    <!--[TODO]回复主体页面 [begin] --><script type="text/javascript">
+var postminchars = parseInt('0');
+var postmaxchars = parseInt('1000000');
+var disablepostctrl = parseInt('0');
+</script>
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/lrtk.js.下载" type="text/javascript"></script>
+<div id="f_pst" class="pl bm bmw">
+<form method="post" autocomplete="off" id="fastpostform" action="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=post&amp;action=reply&amp;fid=783&amp;tid=327537&amp;extra=page%3D&amp;replysubmit=yes&amp;addfeed=1&amp;infloat=yes&amp;handlekey=fastpost" onsubmit="return fastpostvalidate(this)">
+<table cellspacing="0" cellpadding="0">
+<tbody><tr>
+            <!--[TODO]左侧的用户头像  deleted [begin] -->
+                        <!--[TODO]左侧的用户头像 deleted [end] -->
+            
+<td class="">
+
+<span id="fastpostreturn"></span>
+
+
+<div class="cl">
+<div id="fastsmiliesdiv" class="y"><div id="fastsmiliesdiv_data"><div id="fastsmilies"></div></div>
+
+<div class="hbp-pager " style="padding:0; line-height:32px;margin-top:10px;">
+            <button type="button" onclick="showWindow(&#39;login&#39;, &#39;member.php?mod=logging&amp;action=login&amp;guestmessage=yes&#39;)" name="replysubmit" id="fastpostsubmit" class="mkbtn-blue newpost" style="float:right; margin-right:0;" value="replysubmit" tabindex="5"><strong>发表回复</strong></button>
+    		    		    		    		<label for="fastpostrefresh" style="display:none"><input id="fastpostrefresh" type="checkbox" class="pc">回帖后跳转到最后一页</label>
+    		<script type="text/javascript">if(getcookie('fastpostrefresh') == 1) {$('fastpostrefresh').checked=true;}</script>
+    		        </div>
+</div><div class="fbtxt" id="fastposteditor">
+<div class="tedt mtn">
+<div class="bar">
+<span class="y editor">
+<a class="hpost" href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=post&amp;action=reply&amp;fid=783&amp;tid=327537" onclick="return switchAdvanceMode(this.href)">高级模式</a>
+</span><script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/seditor.js.下载" type="text/javascript"></script>
+<div class="fpd">
+<a href="javascript:;" title="文字加粗" class="fbld">B</a>
+<a href="javascript:;" title="设置文字颜色" class="fclr" id="fastpostforecolor">Color</a>
+<a id="fastpostimg" href="javascript:;" title="图片" class="fmg">Image</a>
+<a id="fastposturl" href="javascript:;" title="添加链接" class="flnk">Link</a>
+<a id="fastpostquote" href="javascript:;" title="引用" class="fqt">Quote</a>
+<a id="fastpostcode" href="javascript:;" title="代码" class="fcd">Code</a>
+<a href="javascript:;" class="fsml" id="fastpostsml">Smilies</a>
+</div></div>
+<div class="area">
+<div class="pt hm">
+您需要登录后才可以回帖 <a href="http://support.huawei.com/huaweiconnect/enterprise/member.php?mod=logging&amp;action=login" onclick="showWindow(&#39;login&#39;, this.href)" class="xi2">登录</a> | <a href="http://support.huawei.com/huaweiconnect/enterprise/member.php?mod=register" class="xi2">注册</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<input type="hidden" name="formhash" value="a0c9806a">
+<input type="hidden" name="usesig" value="">
+<input type="hidden" name="subject" value="  ">
+<p class="ptm pnpost">
+        
+        
+</p>
+</td>
+</tr>
+</tbody></table>
+</form>
+</div>
+<!--MODIFY-LDW 商秘--><!--MODIFY-LDW 商秘-->
+<div id="trade_secret_box" style="position: relative; margin: 5px 0; display: none;">
+    <span style="height: 20px;width: 100px;margin-right: 10px;line-height: 20px;"><strong style="color: red;">*</strong> 是否包含第三方商业秘密:</span>
+    <span style="width: 50px;height: 20px;margin: 0 2px;"><label for="trade_secret_yes"><input type="radio" class="trade_secret_radio" value="yes" id="trade_secret_yes" name="trade_secret_radio">是</label></span>
+    <span style="width: 50px;height: 20px;margin: 0 2px;"><label for="trade_secret_no"><input type="radio" class="trade_secret_radio" value="no" id="trade_secret_no" name="trade_secret_radio">否</label></span>
+    <span style="color: red;font-size: small;display: inline-block;width: 15px;height: 15px;border-radius: 50%;border: 1px solid #333;line-height: 15px;text-align: center;" id="trade_secret_hint">？</span>
+    <div style="display:none; position: absolute; border: 1px solid #524b48;border-radius: 2%; left: 430px;bottom: -50px;z-index: 3;padding: 2px;background-color: #f0f0f0;" id="trade_secret_explain">
+        <div style="width: 405px;height: 20px;line-height: 20px;padding: 5px;"><h3 style="color: red;">第三方商业秘密</h3></div>
+        <div style="width: 405px;height: 175px;padding: 5px;">第三方商业秘密是指第三方不为公众所知悉、具有商业价值并经权利人采取保密措施的技术信息和经营信息，包括但不限于：产品的价格信息、路标规划、商务授权、核心算法和源代码等。如有疑问，请联系:<!---->e.support@huawei.com<!---->（各社区公共邮箱）。</div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery('#trade_secret_hint').mousemove(function(){
+        jQuery('#trade_secret_explain').show();
+    })
+    jQuery('#trade_secret_hint').mouseout(function(){
+        jQuery('#trade_secret_explain').hide();
+    })
+</script><span style="font-size:12px;color:#666;">如果附件按钮无法使用，请将Adobe Flash Player 更新到最新版本！</span>
+
+<script type="text/javascript">
+/**
+ * 添加 keyup 事件监听输入符号"@"时，弹出好友列表 add by hyp 2017/03/14
+ */
+</script>
+<style type="text/css">
+.seditorTitle{font-size:15px;margin-top:-9px;display:inline-block;}
+#atExpert, #atFriend{cursor:default}
+#atExpert a, #atFriend a{color:#33b1eb;}
+input[name="user"], input[name="friend"], input[name="expert"]{vertical-align:-2px;margin-right:4px}
+.mtn button.pnc{margin-right:30px}
+.linkman{border-bottom:1px solid #6E6E6E}
+#atkeyword{
+width:240px;text-align:center;color:#6E6E6E;
+border:1px solid #999;
+margin:7px auto 5px;height:23px;
+font-size:14px
+}
+#searchUser{
+width:25px;
+height:25px;
+position:absolute;
+margin-top:-31px;
+margin-left:77px;
+background-image:url(static/image/common/scf_left.png);
+}
+#at_list p, #at_list .info{color:red;text-align:center;margin:12px auto}
+</style>    <!--[TODO]回复主体页面 [end] -->
+
+
+<script type="text/javascript">
+new lazyload();
+</script>
+<script type="text/javascript">document.onkeyup = function(e){keyPageScroll(e, 0, 0, 'forum.php?mod=viewthread&tid=327537', 1);}</script>
+</div>
+
+
+
+
+</div>
+<!--[TODO]显示为一条线，没有具体内容 [begin] -->
+<div class="wp mtn">
+<!--[diy=diy3]--><div id="diy3" class="area"></div><!--[/diy]-->
+</div>
+<!--[TODO]显示为一条线，没有具体内容 [end] -->
+
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/hbweb.js.下载" type="text/javascript"></script>
+<script>
+var jq = jQuery.noConflict(); 
+    jq(function(){
+        hbweb.bbs();
+    });
+/*
+ * 关闭管理界面，同时初始化参数
+ */  
+function hideMdly(){
+jq("input[id^='topiclist_']").remove();
+jq("input[id^='manage']").prop("checked", false);
+modclickcount = 0;
+jq('#mdly').hide();
+}
+</script>
+
+<script type="text/javascript">
+//新浪微博分享
+jQuery(".pa-fx").click(function(){
+window.sharetitle = "【HBase】zookeeper在HBase中的应用";
+window.shareUrl = "";
+share();
+});
+
+function share(){
+//d指的是window
+(function(s,d,e){try{}catch(e){}
+var f;
+if (typeof(window.shareUrl) === "undefined")
+{
+f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(window.sharetitle),'&appkey=2b71aS'].join('');
+}	
+else
+{
+f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(window.sharetitle),'&appkey=2b71aS','&pic=',e(window.shareUrl)].join('');
+}	
+
+function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent);
+}
+</script>
+
+
+<script type="text/javascript">
+function succeedhandle_followmod(url, msg, values) {
+var fObj = $('followmod_'+values['fuid']);
+if(values['type'] == 'add') {
+fObj.innerHTML = '不收听';
+fObj.href = 'home.php?mod=spacecp&ac=follow&op=del&fuid='+values['fuid'];
+} else if(values['type'] == 'del') {
+fObj.innerHTML = '收听TA';
+fObj.href = 'home.php?mod=spacecp&ac=follow&op=add&hash=a0c9806a&fuid='+values['fuid'];
+}
+}
+fixed_avatar([1340841,1640997], 1);
+</script>
+<script type="text/javascript">
+var regdate = "1970-01-01 08:00:00";
+var ids = '{"uid":"0","groupid":"7","extgroupids":"","fid":"783","regdate":"' + regdate +'"}';
+var names = '{"nickname":"","grouptitle":"","extgrouptitles":"","groupname":"大数据"}';
+trackPV('帖子详情', ids, names);
+</script>
+<script>fixed_top_nv();</script>
+</div>
+     
+<div class="footer footer-box" style="position: absolute; bottom: 0px; width: 100%;">
+<div class="w1200">
+<div class="footer-main">
+<div class="footer-nav">
+<a href="http://www.huawei.com/cn/" target="_blank">华为官网</a>
+<!--<a href="http://support.huawei.com/huaweiconnect/enterprise" target="_blank">华为互动社区</a>-->
+<a href="http://support.huawei.com/enterprise/zh" target="_blank">技术支持</a>
+<a href="http://www.huawei.com/cn/about-huawei/" target="_blank">关于华为</a>
+<a href="http://report.12377.cn:13225/toreportinputNormal_anis.do" target="_blank">违法和不良信息举报</a></div>
+<div class="footer-bottom">
+<p>
+联系我们：<a href="mailto:e.support@huawei.com">e.support@huawei.com</a>
+<a href="http://e.huawei.com/cn/service-hotline" target="_blank" style="margin-left:10px;">全球服务热线</a></p>
+<p>版权所有 © 华为技术有限公司 1998-2017。 保留一切权利。粤A2-20044005号</p>
+</div>
+</div>
+<div class="footer-code">
+<img src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/esc_APP_zh.png" width="132" height="143"></div>
+</div>
+</div>    
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/home.php" type="text/javascript"></script>
+<div id="scrolltop">
+<span><a href="http://support.huawei.com/huaweiconnect/enterprise/forum.php?mod=post&amp;action=reply&amp;fid=783&amp;tid=327537&amp;extra=page%3D&amp;page=1" onclick="showWindow(&#39;reply&#39;, this.href)" class="replyfast" title="快速回复"><b>快速回复</b></a></span>
+<span hidefocus="true"><a title="返回顶部" onclick="window.scrollTo(&#39;0&#39;,&#39;0&#39;)" class="scrolltopa"><b>返回顶部</b></a></span>
+</div>
+
+<script type="text/javascript">_attachEvent(window, 'scroll', function () { showTopLink(); });checkBlind();</script>
+<style type="text/css">
+#oldVersion a{
+background-position:0 0;
+}
+#feedBack a{
+background-position:0 -122px;
+	
+}
+</style>
+
+<div class="widget">
+<p id="backTop"><a href="javascript:window.scrollTo(0, 0)" style="display: block;"></a></p>
+</div>
+<script type="text/javascript">
+var kk=JQ(".eh-menu .a").data("menu"); 
+if(kk){ 
+var dis=30; 
+for(i=1;i<kk;i++){ 
+dis+=JQ(".emo_nv li").eq(i-1).width()+60; 
+} 
+dis+=JQ(".emo_nv li").eq(kk-1).width()/2-3.5; 
+var name=".ehm-" + JQ(".eh-menu .a").data("menu"); 
+JQ(".eh-menu b").css("left",dis); 
+JQ(".eh-menu b").removeClass("ehm-0"); 
+} else{ 
+JQ(".eh-menu b").hide(); 
+} 
+JQ(function(){
+JQ(window).scroll(function(){
+if(JQ(window).scrollTop() > 300){			
+JQ('#backTop a').css('display', 'block');
+}else{
+JQ('#backTop a').hide();
+}
+});
+
+JQ(".eh-menu a").mouseover(function(){ 
+JQ(".eh-menu b").removeClass("ehm0 ehm-1"); 
+var k=JQ(this).parent().data("menu"); 
+if(k){ 
+var dis=30; 
+for(i=1;i<k;i++){ 
+dis+=JQ(".emo_nv li").eq(i-1).width()+60; 
+} 
+dis+=JQ(".emo_nv li").eq(k-1).width()/2-3.5; 
+var name=".ehm-" + JQ(this).parent().data("menu"); 
+JQ(".eh-menu b").css("left",dis); 
+} else{ 
+JQ(".eh-menu b").hide(); 
+} 
+}); 
+JQ(".eh-menu").mouseleave(function(){ 
+JQ(".eh-menu b").removeClass("ehm0 ehm-1"); 
+var kkt=JQ(".eh-menu .a").data("menu"); 
+if(kkt){ 
+var dis=30; 
+for(i=1;i<kkt;i++){ 
+dis+=JQ(".emo_nv li").eq(i-1).width()+60; 
+} 
+dis+=JQ(".emo_nv li").eq(kkt-1).width()/2-3.5; 
+var name=".ehm-" + JQ(".eh-menu .a").data("menu"); 
+JQ(".eh-menu b").css("left",dis); 
+} else{ 
+JQ(".eh-menu b").hide();
+}
+});
+});
+JQ(".topbar-secarea").mouseover(function(){
+JQ("#showarealau").css("display", "block");
+});
+JQ(".topbar-secarea").mouseleave(function(){
+JQ("#showarealau").css("display", "none");
+});
+JQ(function(){
+JQ('input, textarea').placeholder();
+});
+/*
+ * 加载 Google 分析工具
+ */ 
+var googleId = 'UA-34391348-1';
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', googleId]);
+_gaq.push(['_trackPageview']);
+(function(){
+var ga = document.createElement('script');
+ga.type = 'text/javascript';
+ga.async = true;
+ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+var s = document.getElementsByTagName('script')[0];
+s.parentNode.insertBefore(ga, s);
+})();
+</script>
+<script src="./【HBase】zookeeper在HBase中的应用-大数据-华为企业互动社区_files/ha2.js.下载" type="text/javascript"></script>
+<!--MODIFY-WZM 控制footer-box位置-->
+<!--<script type="text/javascript">
+JQ(document).ready(function(){
+footerBoxPosition();
+});
+</script>-->
+<!--END MODIFY-WZM 控制footer-box位置-->
+<!--MODIFY-WP 控制footer的位置 T1147-->
+<script>
+JQ(function(){
+JQ('html').height('100%');
+JQ('body').css('min-height','100%').css('height','auto').css('position','relative');
+var divEle = JQ('<div></div>');
+divEle.height(150);
+JQ('body').append(divEle);
+JQ('div.footer-box').css('position','absolute').css('bottom','0').css('width','100%');
+});
+</script>
+
+<div style="height: 150px;"></div></body></html>

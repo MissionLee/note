@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)http://www.cnblogs.com/wuxl360/p/5817648.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/bundle-ClearGertrude.css">
+<link id="mobile-style" media="only screen and (max-width: 768px)" type="text/css" rel="stylesheet" href="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/bundle-ClearGertrude-mobile.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/wuxl360/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/wuxl360/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/wuxl360/wlwmanifest.xml">
+<script async="" src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/analytics.js.下载"></script><script src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/jquery.js.下载" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'wuxl360', cb_enable_mathjax=false;var isLogined=false;</script>
+<script src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/blog-common.js.下载" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<div id="header">
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/wuxl360/">邬兴亮</a></h1>
+<p id="tagline"></p></div>
+<div id="main">
+	
+<div id="post_detail">
+	<div class="post">
+		<h2>
+			<a id="cb_post_title_url" href="http://www.cnblogs.com/wuxl360/p/5817648.html">ZooKeeper学习第八期——ZooKeeper伸缩性</a>
+		</h2>
+		<div class="postText"><div id="cnblogs_post_body"><h1>一、ZooKeeper中Observer</h1>
+<h3>1.1 ZooKeeper角色</h3>
+<p>经过前面的介绍，我想大家都已经知道了在ZooKeeper集群当中有两种角色Leader和Follower。Leader可以接受client 请求，也接收其他Server转发的写请求，负责更新系统状态。 Follower也可以接收client请求，如果是写请求将转发给Leader来更新系统状态，读请求则由Follower的内存数据库直接响应。 ZooKeeper集群如图1.1所示。</p>
+<p style="text-align: center;">图 1.1 ZooKeeper集群服务</p>
+<p style="text-align: center;"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/041834156393063.png" alt=""></p>
+<p>但在ZooKeeper的3.3.3版本以后，ZooKeeper中又添加了一种新角色Observer。Observer的作用同Follower类似，唯一区别就是它不参与选主过程。那么，我们就可以根据该特性将ZK集群中的Server分为两种：</p>
+<p>(1) 投票Server：Leader、Follower</p>
+<p>(2) 非投票Server：Observer</p>
+<h3>1.2 为什么引入Observer</h3>
+<p><strong>(1) ZooKeeper可伸缩性 </strong></p>
+<p>那么，ZooKeeper为什么要引入Observer这个角色呢？其实在ZooKeeper中引入Observer，主要是为了使 ZooKeeper具有更好的可伸缩性。那么，何为可伸缩性？关于伸缩性，对于不同的人意味着不同的事情。 而在这里是说，如果我们的工作负载可以通过给系统分配更多的资源来分担，那么这个系统就是可伸缩的；一个不可伸缩的系统却无法通过增加资源来提升性能，甚 至会在工作负载增加时，性能会急剧下降。</p>
+<p>在Observer出现以前，ZooKeeper的伸缩性由Follower来实现，我们可以通过添加Follower节点的数量来保证 ZooKeeper服务的读性能。但是随着Follower节点数量的增加，ZooKeeper服务的写性能受到了影响。为什么会出现这种情况？在此，我 们需要首先了解一下这个"ZK服务"是如何工作的。</p>
+<p><strong>(2) ZK服务过程 </strong></p>
+<p>ZooKeeper服务中的每个Server可服务于多个Client，并且Client可连接到ZK服务中的任一台Server来提交请求。若是<strong>读请求</strong>，则由每台Server的本地副本数据库直接响应。若是改变Server状态的<strong>写请求</strong>，需要通过一致性协议来处理，这个协议就是我们前面介绍的Zab协议。</p>
+<p>简单来说，Zab协议规定：来自Client的所有写请求，都要转发给ZK服务中唯一的Server<strong>—</strong>Leader， 由Leader根据该请求发起一个Proposal。然后，其他的Server对该Proposal进行Vote。之后，Leader对Vote进行收 集，当Vote数量过半时Leader会向所有的Server发送一个通知消息。最后，当Client所连接的Server收到该消息时，会把该操作更新 到内存中并对Client的写请求做出回应。该工作流程如下图1.2所示。</p>
+<p style="text-align: center;">图1.2 ZK 写请求工作流程图</p>
+<p style="text-align: center;"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/041834170146076.png" alt=""></p>
+<p>从图中我们可以看出， ZooKeeper 服务器在上述协议中实际扮演了两个职能。它们一方面从客户端接受连接与操作请求，另一方面对操作结果进行投票。这两个职能在 ZooKeeper集群扩展的时候彼此制约。例如，当我们希望增加 ZK服务中Client数量的时候，那么我们就需要增加Server的数量，来支持这么多的客户端。然而，从Zab协议对写请求的处理过程中我们可以发 现，增加服务器的数量，则增加了对协议中投票过程的压力。因为Leader节点必须等待集群中过半Server响应投票，于是节点的增加使得部分计算机运 行较慢，从而拖慢整个投票过程的可能性也随之提高，写操作也会随之下降。这正是我们在实际操作中看到的问题——随着 ZooKeeper 集群变大，写操作的吞吐量会下降。</p>
+<p><strong>(3) ZooKeeper扩展 </strong></p>
+<p>所以，我们不得不，在增加Client数量的期望和我们希望保持较好吞吐性能的期望间进行权衡。要打破这一耦合关系，我们引入了不参与投票的服务 器，称为 Observer。 Observer可以接受客户端的连接，并将写请求转发给Leader节点。但是，Leader节点不会要求 Observer参加投票。相反，Observer不参与投票过程，仅仅在上述第3歩那样，和其他服务节点一起得到投票结果。</p>
+<p style="text-align: center;">图 1.3 Observer 写吞吐量测试</p>
+<p style="text-align: center;"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/041834180149904.png" alt=""></p>
+<p>图1.3 显示了一个简单评测的结果。<span style="color: red;">纵轴是，单一客户端能够发出的每秒钟同步写操作的数量。<span style="color: red;">横轴是 ZooKeeper 集群的尺寸。<span style="color: red;">蓝色的是每个服务器都是<strong>投票Server</strong>的情况，而<span style="color: red;">绿色的则只有三个是<strong>投票Server</strong>，其它都是 Observer。从图中我们可以看出，我们在扩充 Observer时写性能几乎可以保持不便。但是，如果扩展<strong>投票Server</strong>的数量，写性能会明显下降，显然 Observers 是有效的。</span></span></span></span></p>
+<p>这个简单的扩展，给 ZooKeeper 的可伸缩性带来了全新的镜像。我们现在可以加入很多 Observer 节点，而无须担心严重影响写吞吐量。但他并非是无懈可击的，因为协议中的通知阶段，仍然与服务器的数量呈线性关系。但是，这里的串行开销非常低。因此，我 们可以认为在通知服务器阶段的开销无法成为主要瓶颈。</p>
+<h2>二、Observer应用</h2>
+<p><strong>(1) Observer提升读性能的可伸缩性 </strong></p>
+<p>应对Client的数量增加，是 Observer的一个重要用例，但是实际上它还给集群带来很多其它的好处。Observer作为ZooKeeper的一个优化，Observer服务器可以直接获取Leader的本地数据存储，而无需经过投票过程。但这也面临一定的"<span style="color: #7030a0;">时光旅行"风险，也就是说：可能在读到新值之后又读到老值。但这只在服务器故障时才会发生事实上，在这种情况下，Client可以通过"sync"操作来保证下一个值是最新的。</span></p>
+<p>因此，在大量读操作的工作负载下，Observer会使ZooKeeper的性能得到巨大提升。若要增加投票Server数量来承担读操作，那么就 会影响ZooKeeper服务的写性能。而且Observer允许我们将读性能和写性能分开，这使ZooKeeper更适用于一些以读为主的应用场景。</p>
+<p><strong>(2) Observer提供了广域网能力 </strong></p>
+<p>Observer还能做更多。Observer对于跨广域网连接的Client来说是很好的候选方案。Observer可作为候选方案，原因有三：</p>
+<p style="margin-left: 24pt;">① 为了获得很好的读性能，有必要让客户端离服务器尽量近，这样往返时延不会太高。然而，将 ZooKeeper 集群分散到两个集群是非常不可取的设计，因为良好配置的 ZooKeeper 应该让投票服务器间用低时延连接互连——否则，我们将会遇到上面提到的低反映速度的问题。</p>
+<p style="margin-left: 24pt;">② 而Observer 可以被部署在，需要访问 ZooKeeper 的任意数据中心中。这样，投票协议不会受到数据中心间链路的高时延的影响，性能得到提升。投票过程中 Observer 和领导节点间的消息远少于投票服务器和领导节点间的消息。这有助于在远程数据中心高写负载的情况下降低带宽需求。</p>
+<p style="margin-left: 24pt;">③ 由于Observer即使失效也不会影响到投票集群，这样如果数据中心间链路发生故障，不会影响到服务本身的可用性。这种故障的发生概率要远高于一个数据中心中机架间的连接的故障概率，所以不依赖于这种链路是个优点。</p>
+<h2>三、ZooKeeper集群搭建案例</h2>
+<p>前面介绍了ZooKeeper集群中的几种角色，接下来给大家来介绍一下如何利用这些角色，来搭建一个性能良好的ZooKeeper集群。我以一个项目为例，给大家分析一下该如何规划我们的ZooKeeper集群。</p>
+<p>假设我们的项目需要进行跨机房操作，我们的总部机房设在<span style="color: blue;">杭州，但他还要同<span style="color: blue;">美国，<span style="color: blue;">青岛等多个机房之间进行数据交互。但机房之间的网络延迟都比较大，比如<span style="color: blue;">中美机房走海底光缆有ping操作200ms的延迟，<span style="color: blue;">杭州和<span style="color: blue;">青岛机房有70ms的延迟。&nbsp;为了提升系统的网络性能，我们在部署ZooKeeper网络时会在每个机房部署节点，多个机房之间再组成一个大的网络，来保证整个ZK集群数据一致性。</span></span></span></span></span></span></p>
+<p>根据前面的介绍，最后的部署结构就会是：</p>
+<p>(总部) 杭州机房&nbsp; &gt;=3台 ：由Leader/Follower构成的投票集群</p>
+<p>(分支) 青岛机房 &nbsp;&gt;=1台 ：<a name="OLE_LINK5"></a>由Observer构成的ZK集群</p>
+<p>(分支) 美国机房 &nbsp;&gt;=1台&nbsp; : 由Observer构成的ZK集群</p>
+<p style="text-align: center;">图 3.1 ZooKeeper集群部署图</p>
+<p style="text-align: center;"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/041834185929560.png" alt=""></p>
+<p>从图中我们可以看出，我们在单个机房内组成一个投票集群，外围的机房都会是一个Observer集群和投票集群进行数据交互。 至于这样部署的一些好处，大家自己根据我前面对ZooKeeper角色的介绍，对比着体会一下，我想这样更能帮助大家理解ZooKeeper。而且针对这 样的部署结构，我们会引入一个<strong>优先集群问题</strong>： 比如在美国机房的Client，需要优先去访问本机房的ZK集群，访问不到才去访问HZ(总部)机房。</p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/wuxl360/category/874409.html" target="_blank">Zookeeper </a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(5817648,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;1246c5cd-5308-e611-9fc1-ac853d9f53cc&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/wuxl360/" target="_blank"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/wuxl360/">邬兴亮</a><br>
+            <a href="http://home.cnblogs.com/u/wuxl360/followees">关注 - 17</a><br>
+            <a href="http://home.cnblogs.com/u/wuxl360/followers">粉丝 - 104</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;1246c5cd-5308-e611-9fc1-ac853d9f53cc&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(5817648,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">1</span>
+    </div>
+    <div class="buryit" onclick="votePost(5817648,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/wuxl360/p/5817646.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/wuxl360/p/5817646.html" title="发布于2016-08-29 13:28">ZooKeeper学习第七期--ZooKeeper一致性原理</a><br><a href="http://www.cnblogs.com/wuxl360/p/5864818.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/wuxl360/p/5864818.html" title="发布于2016-09-12 14:59">让C#可以像Javascript一样操作Json</a><br></div>
+</div>
+
+</div>
+		<p class="postfoot">
+			posted on <span id="post-date">2016-08-29 13:29</span> <a href="http://www.cnblogs.com/wuxl360/">邬兴亮</a> 阅读(<span id="post_view_count">1984</span>) 评论(<span id="post_comment_count">0</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=5817648" rel="nofollow">编辑</a> <a href="http://www.cnblogs.com/wuxl360/p/5817648.html#" onclick="AddToWz(5817648);return false;">收藏</a>
+		</p>
+	</div>
+	<script type="text/javascript">var allowComments=true,cb_blogId=281376,cb_entryId=5817648,cb_blogApp=currentBlogApp,cb_blogUserGuid='1246c5cd-5308-e611-9fc1-ac853d9f53cc',cb_entryCreatedDate='2016/8/29 13:29:00';loadViewCount(cb_entryId);</script>
+	
+	</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/wuxl360/p/5817648.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/wuxl360/p/5817648.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://cloud.tencent.com/act/campus?fromSource=gwzcw.537249.537249.537249" target="_blank">【活动】腾讯云 【云+校园】套餐全新升级</a><br><a href="http://www.gcpowertools.com.cn/products/activereports_overview.htm?utm_source=cnblogs&amp;utm_medium=blogpage&amp;utm_term=bottom&amp;utm_content=AR&amp;utm_campaign=community" target="_blank">【推荐】报表开发有捷径：快速设计轻松集成，数据可视化和交互</a><br></div>
+<div id="opt_under_post"></div>
+<div id="cnblogs_c1" class="c_ad_block"><a href="http://activity.huaweicloud.com/devcloud1024/?utm_source=cnblogs&amp;utm_medium=MediaB&amp;utm_campaign=%E5%8D%8E%E4%B8%BA%E4%BA%91-10%E6%9C%88%E5%B9%BF%E5%91%8A%E6%8A%95%E6%94%BE&amp;utm_content=%E5%8D%9A%E5%AE%A2%E5%9B%AD%E5%86%85%E9%A1%B5C1%E7%9F%A9%E5%BD%A2&amp;utm_term=%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E4%BA%91-1024%E8%AE%BA%E5%9D%9B%E6%B4%BB%E5%8A%A8" target="_blank"><img width="300" height="250" src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/24442-20171015214114324-1153647777.jpg" alt="华为云1016C2"></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/580731/" target="_blank">你以为月入五万的硅谷程序猿想过得像月入五千？那还不是被逼的</a><br> ·  <a href="http://news.cnblogs.com/n/580730/" target="_blank">思科即将收购电信软件公司BroadSoft 价格约20亿美元</a><br> ·  <a href="http://news.cnblogs.com/n/580729/" target="_blank">阅文集团今日在香港IPO，募集资金最多达11亿美元</a><br> ·  <a href="http://news.cnblogs.com/n/580728/" target="_blank">趣店抱大腿成700亿市值土豪 校园贷擦边球还打吗？</a><br> ·  <a href="http://news.cnblogs.com/n/580727/" target="_blank">安卓之父的全面屏Essential Phone降价促销：4000元</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="cnblogs_c2" class="c_ad_block"><a href="http://click.aliyun.com/m/22446/" target="_blank"><img width="468" height="60" src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/24442-20171001085719794-417760373.jpg" alt="阿里云1001"></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/579480/" target="_blank">实用VPC虚拟私有云设计原则</a><br> ·  <a href="http://kb.cnblogs.com/page/576251/" target="_blank">如何阅读计算机科学类的书</a><br> ·  <a href="http://kb.cnblogs.com/page/578103/" target="_blank">Google 及其云智慧</a><br> ·  <a href="http://kb.cnblogs.com/page/575829/" target="_blank">做到这一点，你也可以成为优秀的程序员</a><br> ·  <a href="http://kb.cnblogs.com/page/566880/" target="_blank">写给立志做码农的大学生</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+</div>
+<div id="rightmenu">
+	
+		
+<h3>导航</h3>
+<ul>
+<li><a id="blog_nav_sitehome" href="http://www.cnblogs.com/">博客园</a></li>
+<li><a id="blog_nav_myhome" href="http://www.cnblogs.com/wuxl360/">首页</a></li>
+<li><a id="blog_nav_newpost" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+<li><a id="blog_nav_contact" accesskey="9" rel="nofollow" href="https://msg.cnblogs.com/send/%E9%82%AC%E5%85%B4%E4%BA%AE">联系</a></li>
+<li><a id="blog_nav_rss" href="http://www.cnblogs.com/wuxl360/rss">订阅</a><a id="blog_nav_rss_image" href="http://www.cnblogs.com/wuxl360/rss"><img src="./ZooKeeper学习第八期——ZooKeeper伸缩性 - 邬兴亮 - 博客园_files/xml.gif" alt="订阅"></a></li>
+<li><a id="blog_nav_admin" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+</ul>
+		
+<h3>公告</h3>
+<div class="newsItem">
+	<div id="blog-news"><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/wuxl360/">邬兴亮</a><br>园龄：<a href="http://home.cnblogs.com/u/wuxl360/" title="入园时间：2016-04-22">1年6个月</a><br>粉丝：<a href="http://home.cnblogs.com/u/wuxl360/followers/">104</a><br>关注：<a href="http://home.cnblogs.com/u/wuxl360/followees/">17</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;1246c5cd-5308-e611-9fc1-ac853d9f53cc&#39;)">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>					
+		<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2017/09/01&#39;);return false;">&lt;</a></td><td align="center">2017年10月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2017/11/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">24</td><td class="CalOtherMonthDay" align="center">25</td><td class="CalOtherMonthDay" align="center">26</td><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td></tr><tr><td class="CalWeekendDay" align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td><td class="CalWeekendDay" align="center">7</td></tr><tr><td class="CalWeekendDay" align="center">8</td><td align="center">9</td><td align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td class="CalWeekendDay" align="center">14</td></tr><tr><td class="CalWeekendDay" align="center">15</td><td align="center">16</td><td align="center">17</td><td align="center">18</td><td align="center">19</td><td align="center">20</td><td class="CalWeekendDay" align="center">21</td></tr><tr><td class="CalWeekendDay" align="center">22</td><td class="CalTodayDay" align="center">23</td><td align="center">24</td><td align="center">25</td><td align="center">26</td><td align="center">27</td><td class="CalWeekendDay" align="center">28</td></tr><tr><td class="CalWeekendDay" align="center">29</td><td align="center">30</td><td align="center">31</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+		<div id="blog_stats">
+<h3>统计</h3>
+<ul>
+	<li>随笔 - 309</li>
+	<li>文章 - 1</li>
+	<li>评论 - 38</li>
+	<li>引用 - 0</li>
+ </ul></div>
+		<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/wuxl360/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="http://www.cnblogs.com/wuxl360/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="http://www.cnblogs.com/wuxl360/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="http://www.cnblogs.com/wuxl360/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="http://www.cnblogs.com/wuxl360/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_toptags" class="sidebar-block">
+<h3 class="catListTitle">我的标签</h3>
+<div id="MyTag">
+<ul>
+<li><a href="http://www.cnblogs.com/wuxl360/tag/C%23/">C#</a>(1)</li><li><a href="http://www.cnblogs.com/wuxl360/tag/oracle%20%E6%95%B0%E6%8D%AE%E5%BA%93/">oracle 数据库</a>(1)</li><li><a href="http://www.cnblogs.com/wuxl360/tag/Unity/">Unity</a>(1)</li><li><a href="http://www.cnblogs.com/wuxl360/tag/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/">依赖注入</a>(1)</li>
+</ul>
+</div></div><div id="sidebar_categories">
+		<h3>随笔分类</h3>
+		
+				<ul>
+			
+				<li><a id="CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/wuxl360/category/866286.html"> Knockout 官方中文文档(3)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/wuxl360/category/866268.html"> Knockout.js实战(7)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_2" href="http://www.cnblogs.com/wuxl360/category/819623.html">asp.net(24)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_3" href="http://www.cnblogs.com/wuxl360/category/819576.html">C#(34)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_4" href="http://www.cnblogs.com/wuxl360/category/869891.html">Django实战(24)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_5" href="http://www.cnblogs.com/wuxl360/category/821196.html">jquery(10)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_6" href="http://www.cnblogs.com/wuxl360/category/866199.html">knockoutjs 应用(14)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_7" href="http://www.cnblogs.com/wuxl360/category/824299.html">Linux(19)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_8" href="http://www.cnblogs.com/wuxl360/category/820754.html">MongoDB(15)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_9" href="http://www.cnblogs.com/wuxl360/category/961213.html">MT4编程(1)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_10" href="http://www.cnblogs.com/wuxl360/category/821269.html">mvc(4)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_11" href="http://www.cnblogs.com/wuxl360/category/913759.html">nginx(2)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_12" href="http://www.cnblogs.com/wuxl360/category/881483.html">NHibernate (2)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_13" href="http://www.cnblogs.com/wuxl360/category/824900.html">NoSql(2)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_14" href="http://www.cnblogs.com/wuxl360/category/819578.html">oracle(33)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_15" href="http://www.cnblogs.com/wuxl360/category/821718.html">python(77)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_16" href="http://www.cnblogs.com/wuxl360/category/912046.html">quartz.net(1)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_17" href="http://www.cnblogs.com/wuxl360/category/820525.html">redis(16)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_18" href="http://www.cnblogs.com/wuxl360/category/839214.html">Scrapy(5)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_19" href="http://www.cnblogs.com/wuxl360/category/819577.html">sqlserver(3)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_20" href="http://www.cnblogs.com/wuxl360/category/874409.html">Zookeeper (8)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_21" href="http://www.cnblogs.com/wuxl360/category/825047.html">测试(1)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_22" href="http://www.cnblogs.com/wuxl360/category/834607.html">架构(9)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_23" href="http://www.cnblogs.com/wuxl360/category/869968.html">数据库优化(3)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_24" href="http://www.cnblogs.com/wuxl360/category/892904.html">运维(3)</a> </li>
+			
+				</ul>
+			
+	
+		<h3>随笔档案</h3>
+		
+				<ul>
+			
+				<li><a id="CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/wuxl360/archive/2017/09.html">2017年9月 (2)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/wuxl360/archive/2017/08.html">2017年8月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/wuxl360/archive/2017/05.html">2017年5月 (2)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/wuxl360/archive/2017/04.html">2017年4月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_4" href="http://www.cnblogs.com/wuxl360/archive/2017/03.html">2017年3月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_5" href="http://www.cnblogs.com/wuxl360/archive/2017/02.html">2017年2月 (3)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_6" href="http://www.cnblogs.com/wuxl360/archive/2017/01.html">2017年1月 (8)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_7" href="http://www.cnblogs.com/wuxl360/archive/2016/11.html">2016年11月 (19)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_8" href="http://www.cnblogs.com/wuxl360/archive/2016/10.html">2016年10月 (4)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_9" href="http://www.cnblogs.com/wuxl360/archive/2016/09.html">2016年9月 (9)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_10" href="http://www.cnblogs.com/wuxl360/archive/2016/08.html">2016年8月 (90)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_11" href="http://www.cnblogs.com/wuxl360/archive/2016/07.html">2016年7月 (5)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_12" href="http://www.cnblogs.com/wuxl360/archive/2016/06.html">2016年6月 (31)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_13" href="http://www.cnblogs.com/wuxl360/archive/2016/05.html">2016年5月 (80)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_14" href="http://www.cnblogs.com/wuxl360/archive/2016/04.html">2016年4月 (53)</a> </li>
+			
+				</ul>
+			
+	</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817549.html#3812033">1. Re:ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据</a></li>
+        <li class="recent_comment_body">fifo队列那里的最小节点的处理是有问题的， Integer min = new Integer(list.get(0).substring(7)); f......</li>
+        <li class="recent_comment_author">--cr.wu</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817471.html#3809064">2. Re:ZooKeeper学习第一期---Zookeeper简单介绍</a></li>
+        <li class="recent_comment_body">转载博文，请贴出原文链接！！！</li>
+        <li class="recent_comment_author">--灰色技术</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817549.html#3793500">3. Re:ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据</a></li>
+        <li class="recent_comment_body">看了楼主的系列文章，写得太好了</li>
+        <li class="recent_comment_author">--msn121</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817489.html#3780971">4. Re:ZooKeeper学习第二期--ZooKeeper安装配置</a></li>
+        <li class="recent_comment_body">大神  你的路径失效了</li>
+        <li class="recent_comment_author">--无二</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/wuxl360/p/5817471.html#3774846">5. Re:ZooKeeper学习第一期---Zookeeper简单介绍</a></li>
+        <li class="recent_comment_body">能自己用锁吗，不是你举例的这<br><br>而是像redis setnx那样用的</li>
+        <li class="recent_comment_author">--penkee</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/wuxl360/p/5817471.html">1. ZooKeeper学习第一期---Zookeeper简单介绍(79119)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5920330.html">2. Redis集群搭建与简单使用(64200)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5567631.html">3. 爬虫框架Scrapy的第一个爬虫示例入门教程(18914)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817489.html">4. ZooKeeper学习第二期--ZooKeeper安装配置(9275)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5567065.html">5. Python爬虫进阶三之Scrapy框架安装配置(9178)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/wuxl360/p/5920330.html">1. Redis集群搭建与简单使用(15)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817471.html">2. ZooKeeper学习第一期---Zookeeper简单介绍(12)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817489.html">3. ZooKeeper学习第二期--ZooKeeper安装配置(3)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817405.html">4. 分布式服务框架 Zookeeper -- 管理分布式环境中的数据(2)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817549.html">5. ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据(2)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/wuxl360/p/5817471.html">1. ZooKeeper学习第一期---Zookeeper简单介绍(19)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5920330.html">2. Redis集群搭建与简单使用(8)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817489.html">3. ZooKeeper学习第二期--ZooKeeper安装配置(6)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817549.html">4. ZooKeeper学习第五期--ZooKeeper管理分布式环境中的数据(4)</a></li><li><a href="http://www.cnblogs.com/wuxl360/p/5817524.html">5. ZooKeeper学习第三期---Zookeeper命令操作(3)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+		
+<div id="footer">
+	Powered by: 
+	<br>
+	<a id="Footer1_Hyperlink3" href="http://www.cnblogs.com/" style="font-family:Verdana;font-size:12px;">博客园</a>
+	<br>
+	Copyright © 邬兴亮
+</div>
+	
+</div>			
+			
+	
+
+
+
+</body></html>

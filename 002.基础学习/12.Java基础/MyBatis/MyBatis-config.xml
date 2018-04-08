@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE configuration  
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-config.dtd">  
+<!-- 配置文件的根元素 -->  
+<configuration>  
+    <!-- 属性：定义配置外在化 -->  
+    <properties></properties>  
+    <!-- 设置：定义mybatis的一些全局性设置 -->  
+    <settings>  
+       <!-- 具体的参数名和参数值 -->  
+       <setting name="" value=""/>   
+    </settings>  
+    <!-- 类型名称：为一些类定义别名 -->  
+    <typeAliases></typeAliases>  
+    <!-- 类型处理器：定义Java类型与数据库中的数据类型之间的转换关系 -->  
+    <typeHandlers></typeHandlers>  
+    <!-- 对象工厂 -->  
+    <objectFactory type=""></objectFactory>  
+    <!-- 插件：mybatis的插件,插件可以修改mybatis的内部运行规则 -->  
+    <plugins>  
+       <plugin interceptor=""></plugin>  
+    </plugins>  
+    <!-- 环境：配置mybatis的环境 -->  
+    <environments default="">  
+       <!-- 环境变量：可以配置多个环境变量，比如使用多数据源时，就需要配置多个环境变量 -->  
+       <environment id="">  
+          <!-- 事务管理器 -->  
+          <transactionManager type=""></transactionManager>  
+          <!-- 数据源 -->  
+          <dataSource type=""></dataSource>  
+       </environment>   
+    </environments>  
+    <!-- 数据库厂商标识 -->  
+    <databaseIdProvider type=""></databaseIdProvider>  
+    <!-- 映射器：指定映射文件或者映射类 -->  
+    <mappers></mappers>  
+</configuration> 

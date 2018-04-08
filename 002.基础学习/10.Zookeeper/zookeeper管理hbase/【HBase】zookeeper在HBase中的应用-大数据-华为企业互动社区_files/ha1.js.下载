@@ -1,0 +1,9 @@
+var _haq=_haq||[];
+_haq.push(["_defApp","HuaweiConnect"]);
+_haq.push(["_defCookieU","uid"]);
+_haq.push(["_defCookieS","__hasiId"]);
+_haq.push(["_defSampleRate",10]);
+_haq.push(["_defCookieL","lang"]);
+_haq.push(['_defAutoTrackPv', true]);
+_haq.push(['_defAutoTrackApv', true]);
+_haq.push(['_defAutoTrackClick', false]);
