@@ -22,7 +22,18 @@ Spark Operator
       - [cartesian](#cartesian)
       - [groupBy](#groupBy)
       - [zip](#zip)
-
+  - Action
+    - RDD
+      - [foreach-无测试]
+      - [foreachPartiton](#foreachPartition)
+      - [collect](#collect)
+      - [toLocalIterator](#toLocalIterator)
+      - [subtract](#subtract)
+      - [reduce](#redcue)
+      - [treeReduce](#treeReduce)
+      - [fold](#fold)
+      - [aggregate](#aggregate)
+      - [count](#count)
 
 ##  <span id ="map">Map</span>
 
@@ -1541,3 +1552,1038 @@ Process finished with exit code 1
 - zip会按照顺序对rdd和rdd中的元素进行匹配
   - 如果RDD分区数量不同，会直接报错，不执行程序（测试很简单，没在例子中展示）
   - 如果对应RDD中元素不同，程序还是会匹配一部分合格的数据
+
+##  <span id ="foreachPartition">foreachPartition</span>
+
+```scala
+// 源码
+ /**
+   * Applies a function f to each partition of this RDD.
+   */
+  def foreachPartition(f: Iterator[T] => Unit): Unit = withScope {
+    val cleanF = sc.clean(f)
+    sc.runJob(this, (iter: Iterator[T]) => cleanF(iter))
+  }
+```
+
+输入
+  - 一个函数
+    - 入参是一个 Iterator
+    - 无返回值
+作用
+  - 内部会把一个分区的数据的Iterator当作参数传给开发者定义的函数，完成相映的工作
+
+```测试代码
+object TestForEachPartition{
+  val ss = SparkSession.builder().master("local").appName("basic").getOrCreate()
+  val sc = ss.sparkContext
+  sc.setLogLevel("error")
+  val a1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip1.txt")
+  val a2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip2.txt")
+  val b1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip3.txt")
+  val b2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip4.txt")
+
+  def main(args: Array[String]): Unit = {
+    val rdd = a1++a2++b1++b2
+    rdd.foreachPartition(
+      r=>{
+        var x = ""
+        while (r.hasNext){
+          x=x+r.next().toString
+        }
+        println(x)
+      }
+    )
+
+  }
+}
+```
+
+测试结果
+```scala
+A1A2A3A4
+A5A6
+B1B2B3B4
+B5B6
+```
+
+- 可以看到，每个分区被连接成了字符串
+
+##  <span id ="collect">collect</span>
+
+
+```scala
+  /**
+   * Return an array that contains all of the elements in this RDD.
+   *
+   * @note This method should only be used if the resulting array is expected to be small, as
+   * all the data is loaded into the driver's memory.
+   */
+  def collect(): Array[T] = withScope {
+    val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray)
+    Array.concat(results: _*)
+  }
+
+    /**
+   * Return an RDD that contains all matching values by applying `f`.
+   */
+  def collect[U: ClassTag](f: PartialFunction[T, U]): RDD[U] = withScope {
+    val cleanF = sc.clean(f)
+    filter(cleanF.isDefinedAt).map(cleanF)
+  }
+```
+
+返回一个包含RDD中所有的元素的数组
+
+注意： 因为所有数据会在这个步骤装载到内存中，我们希望这个数组不要太大
+
+>基础方法测试
+
+```scala
+object TestCollect {
+  val ss = SparkSession.builder().master("local").appName("basic").getOrCreate()
+  val sc = ss.sparkContext
+  sc.setLogLevel("error")
+  val a1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip1.txt")
+  val a2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip2.txt")
+  val b1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip3.txt")
+  val b2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip4.txt")
+
+  def main(args: Array[String]): Unit = {
+    val rdd = a1++a2++b1++b2
+    val array = rdd.collect()
+    for(str<-array){
+      println(str)
+    }
+
+  }
+}
+```
+
+输出
+
+```note
+A1
+A2
+A3
+A4
+A5
+A6
+B1
+B2
+B3
+B4
+B5
+B6
+```
+
+>带过滤的方法测试
+
+在源代码中可以看到，collect实际上把我们提供的函数传-一个标准偏函数-递给了 filter
+
+filter实际上是要求对元素进行判断并返回布尔值
+
+```scala
+// 自己实现的一个偏函数，因为spark 总使用，需要可序列化
+class MyParitialFunction extends Serializable   with PartialFunction [Any,String]{
+  override def isDefinedAt(x: Any): Boolean = if(x.toString.startsWith("A")) true else false
+
+  override def apply(v1: Any): String = v1.toString
+}
+// 测试如下
+object TestCollect {
+  val ss = SparkSession.builder().master("local").appName("basic").getOrCreate()
+  val sc = ss.sparkContext
+  sc.setLogLevel("error")
+  val a1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip1.txt")
+  val a2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip2.txt")
+  val b1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip3.txt")
+  val b2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip4.txt")
+
+  def main(args: Array[String]): Unit = {
+    val rdd4 = sc.parallelize(List(1, 2, 3))
+    val rdd = a1 ++ a2 ++ b1 ++ b2
+    val array = rdd.collect()
+    for (str <- array) {
+      println(str)
+    }
+
+    val array2 = rdd.collect { case a: String => {
+      if (a.startsWith("A")) a
+    }
+    }
+    val array3 = rdd.collect(new MyParitialFunction)
+
+
+    println(" array2")
+    for (str <- array2) {
+      println(str)
+    }
+    println("array 3")
+    for (str <- array3) {
+      println(str)
+    }
+  }
+}
+```
+
+结果
+
+```note
+A1
+A2
+A3
+A4
+A5
+A6
+B1
+B2
+B3
+B4
+B5
+B6
+ array2
+A1
+A2
+A3
+A4
+A5
+A6
+()
+()
+()
+()
+()
+()
+array 3
+A1
+A2
+A3
+A4
+A5
+A6
+```
+
+- 结论
+  - 在List类型的collect中给定一个 case实现的偏函数是一种很方便的提取指定类型数据，然后操作返回的方法
+  - 在SparkRDD中这样操作我个人目前没发发现太大的一以，因为RDD中一般存储相同类型的内容，没有必要用偏函数的过滤特性，而如果我们需要筛选，在之前多一部 filter函数，可能是更优秀的选择
+
+##  <span id ="toLocalIterator">toLocalIterator</span>
+
+
+ ```scala
+ /**
+   * Return an iterator that contains all of the elements in this RDD.
+   *
+   * The iterator will consume as much memory as the largest partition in this RDD.
+   *
+   * @note This results in multiple Spark jobs, and if the input RDD is the result
+   * of a wide transformation (e.g. join with different partitioners), to avoid
+   * recomputing the input RDD should be cached first.
+   */
+  def toLocalIterator: Iterator[T] = withScope {
+    def collectPartition(p: Int): Array[T] = {
+      sc.runJob(this, (iter: Iterator[T]) => iter.toArray, Seq(p)).head
+    }
+    (0 until partitions.length).iterator.flatMap(i => collectPartition(i))
+  }
+```
+
+返回一个包含RDD所有元素的iterator。iterator占用RDD中最大分区的内存大小
+
+源码分析
+```scala
+//首先是一个内部方法
+    def collectPartition(p: Int): Array[T] = {
+      sc.runJob(this, (iter: Iterator[T]) => iter.toArray, Seq(p)).head
+    }
+    
+```
+从方法名可以看出，这是用来获取分区的
+其中 sc.runJob
+```scala
+// runJob有许多重载，我们看直接使用的这一个
+  /**
+   * Run a function on a given set of partitions in an RDD and return the results as an array.
+   *
+   * @param rdd target RDD to run tasks on
+   * @param func a function to run on each partition of the RDD
+   * @param partitions set of partitions to run on; some jobs may not want to compute on all
+   * partitions of the target RDD, e.g. for operations like `first()`
+   * @return in-memory collection with a result of the job (each collection element will contain
+   * a result from one partition)
+   */
+  def runJob[T, U: ClassTag](
+      rdd: RDD[T],
+      func: Iterator[T] => U,
+      partitions: Seq[Int]): Array[U] = {
+    val cleanedFunc = clean(func)
+    runJob(rdd, (ctx: TaskContext, it: Iterator[T]) => cleanedFunc(it), partitions)
+  }
+  //在RDD的指定的某些分区中执行给定的函数，返回一个结果数组
+  // runJob的体系和DAG相关，不再往后查找了（点了点代码，太深了）
+```
+再toLocalIterator代码中，传递给runJob的方法是
+```scala
+(iter: Iterator[T]) => iter.toArray
+// 这个方法是交给 spark 来执行的，spark会把自己的rdd的iterator带入这个函数，返回的是这个iterator的 .toArray => 完成的工作就是整个RDD元素转未了Array
+```
+
+回到最外层的代码中
+```scala
+  def toLocalIterator: Iterator[T] = withScope {
+    def collectPartition(p: Int): Array[T] = {
+      sc.runJob(this, (iter: Iterator[T]) => iter.toArray, Seq(p)).head
+    }
+    (0 until partitions.length).iterator.flatMap(i => collectPartition(i))
+  }
+```
+其中
+```scala
+    (0 until partitions.length).iterator.flatMap(i => collectPartition(i))
+// 0 until 10 获取的是一个 Range 
+// 下面简单看一下Range的定义 不做过多解释
+class Range(val start: Int, val end: Int, val step: Int)
+extends scala.collection.AbstractSeq[Int]
+   with IndexedSeq[Int]
+   with scala.collection.CustomParallelizable[Int, ParRange]
+   with Serializable
+```
+这里有一点就是 iterator 中的flatMap
+```scala
+  /** Creates a new iterator by applying a function to all values produced by this iterator
+   *  and concatenating the results.
+   *
+   *  @param f the function to apply on each element.
+   *  @return  the iterator resulting from applying the given iterator-valued function
+   *           `f` to each value produced by this iterator and concatenating the results.
+   *  @note    Reuse: $consumesAndProducesIterator
+   */
+  def flatMap[B](f: A => GenTraversableOnce[B]): Iterator[B] = new AbstractIterator[B] {
+//missingli： 这实际上就是一个 嵌套的 iterator，外层iterator存储的元素是一个iterator，每次外部访问，向循环 外层iterator存储的iterator，然后 循环外层iterator
+
+    // 要求输入参数 返回一个 可遍历的 类型
+    // 返回一个iterator
+    
+    // 这个Iterator是一个 AbstractIterator的 实例
+
+    private var cur: Iterator[B] = empty
+    //获得一个空的 iterator
+
+    private def nextCur() { cur = f(self.next()).toIterator }
+    // nextCur  
+
+    def hasNext: Boolean = {
+      // Equivalent to cur.hasNext || self.hasNext && { nextCur(); hasNext }
+      // but slightly shorter bytecode (better JVM inlining!)
+      while (!cur.hasNext) {  //如果当前存储的iterator 没有元素了 就把外部的元素向下走一位置，并且把 
+        if (!self.hasNext) return false//遍历外层 如果外层没有了，就真的没有了
+        nextCur()//当前到头了，外部还每到头，就  =>外部的下个元素的 iterator 指向 cur
+      }
+      true
+    }
+    def next(): B = (if (hasNext) cur else empty).next()
+  }
+  // 对一个 iterator 的每个元素执行一个function，并把所有的结果汇总返回成一个 iterator
+
+  // 内外代码整合大概是下面这个逻辑
+    // 1.collectPartition 把RDD每个分区转成一个Array
+    // 2.通过Range的flatMap,获得一个(分区Iterator-分区Array.toIterator) 复合的Iterator
+  
+```
+
+
+测试代码
+
+```scala
+object TestToLocalIterator {
+  val ss = SparkSession.builder().master("local").appName("basic").getOrCreate()
+  val sc = ss.sparkContext
+  sc.setLogLevel("error")
+  val a1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip1.txt")
+  val a2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip2.txt")
+  val b1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip3.txt")
+  val b2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip4.txt")
+
+  def main(args: Array[String]): Unit = {
+    val rdd = a1++a2++b1++b2
+    val iter = rdd.toLocalIterator
+    while (iter.hasNext){
+      println(iter.next())
+    }
+  }
+}
+```
+测试结果
+```note
+A1
+A2
+A3
+A4
+A5
+A6
+B1
+B2
+B3
+B4
+B5
+B6
+```
+
+##  <span id ="subtract">subtract</span>
+
+
+```scala
+/**
+   * Return an RDD with the elements from `this` that are not in `other`.
+   *
+   * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
+   * RDD will be &lt;= us.
+   */
+  def subtract(other: RDD[T]): RDD[T] = withScope {
+    subtract(other, partitioner.getOrElse(new HashPartitioner(partitions.length)))
+  }
+
+  /**
+   * Return an RDD with the elements from `this` that are not in `other`.
+   */
+  def subtract(other: RDD[T], numPartitions: Int): RDD[T] = withScope {
+    subtract(other, new HashPartitioner(numPartitions))
+  }
+
+  /**
+   * Return an RDD with the elements from `this` that are not in `other`.
+   */
+  def subtract(
+      other: RDD[T],
+      p: Partitioner)(implicit ord: Ordering[T] = null): RDD[T] = withScope {
+    if (partitioner == Some(p)) {
+      // Our partitioner knows how to handle T (which, since we have a partitioner, is
+      // really (K, V)) so make a new Partitioner that will de-tuple our fake tuples
+      val p2 = new Partitioner() {
+        override def numPartitions: Int = p.numPartitions
+        override def getPartition(k: Any): Int = p.getPartition(k.asInstanceOf[(Any, _)]._1)
+      }
+      // Unfortunately, since we're making a new p2, we'll get ShuffleDependencies
+      // anyway, and when calling .keys, will not have a partitioner set, even though
+      // the SubtractedRDD will, thanks to p2's de-tupled partitioning, already be
+      // partitioned by the right/real keys (e.g. p).
+      this.map(x => (x, null)).subtractByKey(other.map((_, null)), p2).keys
+    } else {
+      this.map(x => (x, null)).subtractByKey(other.map((_, null)), p).keys
+    }
+  }
+```
+
+- 减法操作，返回当前rdd中，与提供rdd不同的部分
+
+- 主要测试内容与结论
+  - rdd3=rdd1.subtract(rdd2) 
+  - 1.验证减操作
+  - 2.验证当rdd1 存在多份与rdd2 中相同内容的情况
+
+```scala
+A1
+A2
+A3
+A4
+A5
+A6
+ subtract 
+A1
+A3
+A2
+A4
+--------------------
+A1
+A2
+A3
+A4
+A5
+A6
+A5
+A6
+subtract
+A1
+A4
+A2
+A3
+
+Process finished with exit code 0
+
+```
+
+结论： 当rdd中存在多份相同数据，而减法操作中出现了相同数据的时候，所有数据都会被匹配并去除
+
+##  <span id ="reduce">reduce</span>
+
+```scala
+  /**
+   * Reduces the elements of this RDD using the specified commutative and
+   * associative binary operator.
+   */
+  def reduce(f: (T, T) => T): T = withScope {
+    val cleanF = sc.clean(f)
+    val reducePartition: Iterator[T] => Option[T] = iter => {
+      if (iter.hasNext) {
+        Some(iter.reduceLeft(cleanF))
+      } else {
+        None
+      }
+    }
+    var jobResult: Option[T] = None
+    val mergeResult = (index: Int, taskResult: Option[T]) => {
+      if (taskResult.isDefined) {
+        jobResult = jobResult match {
+          case Some(value) => Some(f(value, taskResult.get))
+          case None => taskResult
+        }
+      }
+    }
+    sc.runJob(this, reducePartition, mergeResult)
+    // Get the final result out of our Option, or throw an exception if the RDD was empty
+    jobResult.getOrElse(throw new UnsupportedOperationException("empty collection"))
+  }
+```
+
+- 作用： 给定一个函数，输入 rdd两个元素，返回一个同类型元素
+
+-测试代码
+```scala
+package basic
+
+import org.apache.spark.sql.SparkSession
+
+/**
+  * 
+  */
+object TestReduce {
+  val ss = SparkSession.builder().master("local").appName("basic").getOrCreate()
+  val sc = ss.sparkContext
+  sc.setLogLevel("error")
+  val a1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip1.txt")
+  val a2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip2.txt")
+  val b1 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip3.txt")
+  val b2 = sc.textFile("/home/missingli/IdeaProjects/SparkLearn/src/main/resources/sparkzip4.txt")
+
+  def main(args: Array[String]): Unit = {
+    println("---------String-----")
+    val rdd1 = a1 ;
+    val rdd2 =rdd1.reduce(_+_)
+    println(rdd2)
+    println("----------Int-----------")
+    val c = sc.parallelize(1 to 10)
+    val c2 = c.reduce(_+_)
+    println(c2)
+    println("----------Int with partition--------")
+    val c3 = c++c++c;
+    val c4 =c3.reduce(_+_)
+    println(c4)
+
+  }
+}
+```
+
+代码输出
+
+```note
+---------String-----
+A1A2A3A4
+----------Int-----------
+55
+----------Int with partition--------
+165
+```
+
+- 结论
+  - 按照指定的函数进行计算
+  - 会计算整个rdd（跨分区）
+  - 因为需要用计算结果带入提供的函数连续计算，所以限制了返回类型必须和输入类型一样
+- 作用
+  - 可以用来数字求和
+  - 可以用来求最值
+  - 其他
+
+```scala
+//求最值写法
+    println("----------find the largest number-----------")
+    val c5 = c.reduce((x,y)=>if(x>y) x else y)
+    println(c5)
+```
+
+
+```note
+----------find the largest number-----------
+10
+```
+
+
+##  <span id ="treeReduce">treeReduce</span>
+
+```scala
+  /**
+   * Reduces the elements of this RDD in a multi-level tree pattern.
+   *
+   * @param depth suggested depth of the tree (default: 2)
+   * @see [[org.apache.spark.rdd.RDD#reduce]]
+   */
+  def treeReduce(f: (T, T) => T, depth: Int = 2): T = withScope {
+    require(depth >= 1, s"Depth must be greater than or equal to 1 but got $depth.")
+    val cleanF = context.clean(f)
+    val reducePartition: Iterator[T] => Option[T] = iter => {
+      if (iter.hasNext) {
+        Some(iter.reduceLeft(cleanF))
+      } else {
+        None
+      }
+    }
+    val partiallyReduced = mapPartitions(it => Iterator(reducePartition(it)))
+    val op: (Option[T], Option[T]) => Option[T] = (c, x) => {
+      if (c.isDefined && x.isDefined) {
+        Some(cleanF(c.get, x.get))
+      } else if (c.isDefined) {
+        c
+      } else if (x.isDefined) {
+        x
+      } else {
+        None
+      }
+    }
+    partiallyReduced.treeAggregate(Option.empty[T])(op, op, depth)
+      .getOrElse(throw new UnsupportedOperationException("empty collection"))
+  }
+```
+
+- 从作用上看 reduce 与 tree reduce 差不多
+
+```scala
+package basic
+
+import org.apache.spark.sql.SparkSession
+
+/**
+  * 
+  */
+object TestTreeRedcue {
+  val ss = SparkSession.builder().master("local").appName("basic").getOrCreate()
+  val sc = ss.sparkContext
+  sc.setLogLevel("error")
+  def main(args: Array[String]): Unit = {
+
+    println("----------reduce-----------")
+    val c = sc.parallelize(1 to 10)
+    val c2 = c.reduce(_+_)
+    println(c2)
+    println("-----------tree redcue-------")
+    val c3 = c.treeReduce(_+_);
+    println(c3)
+  }
+}
+
+```
+
+结果
+
+```scala
+----------reduce-----------
+55
+-----------tree redcue-------
+55
+```
+
+区别（攻略文档中看到的）
+- TreeReduce 应用与单个reduce操作开销较大的情况，会针对每个分区现行计算，然后聚合得到最终结果。
+- 实际应用中可以代替 reduce
+
+##  <span id ="fold">fold</span>
+
+- 通过给定的 associative function(结合函数)和一个"zero value"。对每个分区的元素进行聚合得到相应结果，然后对每个分区的结果进行聚合 
+- fold与reduce类似，区别是可以给定一个零值/初始值
+```scala
+  /**
+   * Aggregate the elements of each partition, and then the results for all the partitions, using a
+   * given associative function and a neutral "zero value". The function
+   * op(t1, t2) is allowed to modify t1 and return it as its result value to avoid object
+   * allocation; however, it should not modify t2.
+   *
+   * This behaves somewhat differently from fold operations implemented for non-distributed
+   * collections in functional languages like Scala. This fold operation may be applied to
+   * partitions individually, and then fold those results into the final result, rather than
+   * apply the fold to each element sequentially in some defined ordering. For functions
+   * that are not commutative, the result may differ from that of a fold applied to a
+   * non-distributed collection.
+   *
+   * @param zeroValue the initial value for the accumulated result of each partition for the `op`
+   *                  operator, and also the initial value for the combine results from different
+   *                  partitions for the `op` operator - this will typically be the neutral
+   *                  element (e.g. `Nil` for list concatenation or `0` for summation)
+   * @param op an operator used to both accumulate results within a partition and combine results
+   *                  from different partitions
+   */
+  def fold(zeroValue: T)(op: (T, T) => T): T = withScope {
+    // Clone the zero value since we will also be serializing it as part of tasks
+    var jobResult = Utils.clone(zeroValue, sc.env.closureSerializer.newInstance())
+    val cleanOp = sc.clean(op)
+    val foldPartition = (iter: Iterator[T]) => iter.fold(zeroValue)(cleanOp)
+    val mergeResult = (index: Int, taskResult: T) => jobResult = op(jobResult, taskResult)
+    sc.runJob(this, foldPartition, mergeResult)
+    jobResult
+  }
+```
+
+测试代码
+
+```scala
+object TestFold {
+  val ss = SparkSession.builder().master("local").appName("basic").getOrCreate()
+  val sc = ss.sparkContext
+  sc.setLogLevel("error")
+  val x = List(1,2,3,4,5,6,7,8,9);
+  val rdd1 = sc.parallelize(x,1)
+  val rdd2 = sc.parallelize(x,2)
+  val a1 =rdd1.fold(100)((x,y)=>x+y)
+  val a2 =rdd2.fold(100)((x,y)=>x+y)
+
+
+  def main(args: Array[String]): Unit = {
+    println("a1:" + a1)
+    print("a2:" + a2)
+  }
+}
+```
+测试结果
+
+```note
+a1:245
+a2:345
+```
+
+- 结论
+  - a1 所对应的rdd 只有一个分区
+    - 首先 计算 100（零数值）+1，2，3，4，5，6，7，8，9 得到 145
+    - 然后计算 100 + 各个分区的结果（因为只有一个分区，所以是 145）
+    - 最终结果 245
+  - a2 对应rdd 有来嗯个分区
+    - 首先每个分区计算  100 + 分区内容合
+    - 然后计算分区总赫 100 + 分区1结果 + 分区2结果
+    - 就是  100 + 100+ 分区1内容 + 10 + 分区2 内容  （其中 分区1内容+ 分区2 内容为 45）
+    - 结果 345
+
+##  <span id ="aggregate">aggregate</span>
+
+
+- 源码解析
+  - 1. 参数 zeroValue 类型 U
+  - 2. 参数函数1 seqOp (U,T)=>U
+    - 用来对一个分区中的元素进行晕眩
+  - 3. 参数函数2 comOp (U,U)=>U
+    - 用来对分区之间的结果进行计算
+  - 
+
+```scala
+ /**
+   * Aggregate the elements of each partition, and then the results for all the partitions, using
+   * given combine functions and a neutral "zero value". This function can return a different result
+   * type, U, than the type of this RDD, T. Thus, we need one operation for merging a T into an U
+   * and one operation for merging two U's, as in scala.TraversableOnce. Both of these functions are
+   * allowed to modify and return their first argument instead of creating a new U to avoid memory
+   * allocation.
+   *
+   * @param zeroValue the initial value for the accumulated result of each partition for the
+   *                  `seqOp` operator, and also the initial value for the combine results from
+   *                  different partitions for the `combOp` operator - this will typically be the
+   *                  neutral element (e.g. `Nil` for list concatenation or `0` for summation)
+   * @param seqOp an operator used to accumulate results within a partition
+   * @param combOp an associative operator used to combine results from different partitions
+   */
+  def aggregate[U: ClassTag](zeroValue: U)(seqOp: (U, T) => U, combOp: (U, U) => U): U = withScope {
+    // Clone the zero value since we will also be serializing it as part of tasks
+    var jobResult = Utils.clone(zeroValue, sc.env.serializer.newInstance())
+    val cleanSeqOp = sc.clean(seqOp)
+    val cleanCombOp = sc.clean(combOp)
+    val aggregatePartition = (it: Iterator[T]) => it.aggregate(zeroValue)(cleanSeqOp, cleanCombOp)
+    val mergeResult = (index: Int, taskResult: U) => jobResult = combOp(jobResult, taskResult)
+    sc.runJob(this, aggregatePartition, mergeResult)
+    jobResult
+  }
+
+  /**
+   * Aggregates the elements of this RDD in a multi-level tree pattern.
+   *
+   * @param depth suggested depth of the tree (default: 2)
+   * @see [[org.apache.spark.rdd.RDD#aggregate]]
+   */
+  def treeAggregate[U: ClassTag](zeroValue: U)(
+      seqOp: (U, T) => U,
+      combOp: (U, U) => U,
+      depth: Int = 2): U = withScope {
+    require(depth >= 1, s"Depth must be greater than or equal to 1 but got $depth.")
+    if (partitions.length == 0) {
+      Utils.clone(zeroValue, context.env.closureSerializer.newInstance())
+    } else {
+      val cleanSeqOp = context.clean(seqOp)
+      val cleanCombOp = context.clean(combOp)
+      val aggregatePartition =
+        (it: Iterator[T]) => it.aggregate(zeroValue)(cleanSeqOp, cleanCombOp)
+      var partiallyAggregated = mapPartitions(it => Iterator(aggregatePartition(it)))
+      var numPartitions = partiallyAggregated.partitions.length
+      val scale = math.max(math.ceil(math.pow(numPartitions, 1.0 / depth)).toInt, 2)
+      // If creating an extra level doesn't help reduce
+      // the wall-clock time, we stop tree aggregation.
+
+      // Don't trigger TreeAggregation when it doesn't save wall-clock time
+      while (numPartitions > scale + math.ceil(numPartitions.toDouble / scale)) {
+        numPartitions /= scale
+        val curNumPartitions = numPartitions
+        partiallyAggregated = partiallyAggregated.mapPartitionsWithIndex {
+          (i, iter) => iter.map((i % curNumPartitions, _))
+        }.reduceByKey(new HashPartitioner(curNumPartitions), cleanCombOp).values
+      }
+      partiallyAggregated.reduce(cleanCombOp)
+    }
+  }
+```
+
+- aggregate 和 reduce/fold有些类似
+  - 复习一下
+    - reduce 对数据进行 reduce
+    - fold 对数据进行有初始值的 reduce（注意数据分区情况下存在的问题）
+  - aggregate
+
+首先还是用一个普通的示例：
+```scala
+    val rdd = sc.parallelize(List(1,2,3,4,5,6,7,8,9))
+    val result = rdd.aggregate(0)((x,y)=>x+y,(x,y)=>x+y);
+    println(result) //45
+```
+
+从参数函数 seqOp 可以看到， aggregate可以生成与RDD中元素不同类型的结果（RDD： T ，结果 ：U）
+
+我们下面做一个简单测试
+
+```scala
+    val result2 = rdd.aggregate((0, 0))(
+      (x, y) => (x._1 + 1, x._2 + y)
+    ,
+      (a, b) => (a._1 + b._1, a._2 + b._2))
+    println(result2) //(9,45)
+```
+
+这里 我们的 类型 U 实际是一个 二元组，相当于 key-value的形式。
+
+在处理过程中，要保证 zeroValue和来个函数的返回值保持同一个形式
+
+稍微改动一下函数，看一下运行过程
+
+```scala
+    val result2 = rdd.aggregate((0, 0))(
+      (x, y) => {
+        println("x:"+x)
+        (x._1 + 1, x._2 + y)}
+    ,
+      (a, b) => (a._1 + b._1, a._2 + b._2))
+    println(result2) //(9,45)
+    }
+```
+
+打印出来的流程
+
+```note
+x:(0,0)
+x:(1,1)
+x:(2,3)
+x:(3,6)
+x:(4,10)
+x:(5,15)
+x:(6,21)
+x:(7,28)
+x:(8,36)
+```
+
+##  <span id ="count">count</span>
+
+```scala
+
+  /**
+   * Return the number of elements in the RDD.
+   */
+  def count(): Long = sc.runJob(this, Utils.getIteratorSize _).sum
+
+  /**
+   * Approximate version of count() that returns a potentially incomplete result
+   * within a timeout, even if not all tasks have finished.
+   *
+   * The confidence is the probability that the error bounds of the result will
+   * contain the true value. That is, if countApprox were called repeatedly
+   * with confidence 0.9, we would expect 90% of the results to contain the
+   * true count. The confidence must be in the range [0,1] or an exception will
+   * be thrown.
+   *
+   * @param timeout maximum time to wait for the job, in milliseconds
+   * @param confidence the desired statistical confidence in the result
+   * @return a potentially incomplete result, with error bounds
+   */
+  def countApprox(
+      timeout: Long,
+      confidence: Double = 0.95): PartialResult[BoundedDouble] = withScope {
+    require(0.0 <= confidence && confidence <= 1.0, s"confidence ($confidence) must be in [0,1]")
+    val countElements: (TaskContext, Iterator[T]) => Long = { (ctx, iter) =>
+      var result = 0L
+      while (iter.hasNext) {
+        result += 1L
+        iter.next()
+      }
+      result
+    }
+    val evaluator = new CountEvaluator(partitions.length, confidence)
+    sc.runApproximateJob(this, countElements, evaluator, timeout)
+  }
+```
+这里的这个方法的返回值挺有意思
+
+[PartialResult[BoundedDouble]](../../相关内容/07.ParticalResult.md)
+
+```scala
+  /**
+   * Return the count of each unique value in this RDD as a local map of (value, count) pairs.
+   *
+   * @note This method should only be used if the resulting map is expected to be small, as
+   * the whole thing is loaded into the driver's memory.
+   * To handle very large results, consider using
+   *
+   * {{{
+   * rdd.map(x => (x, 1L)).reduceByKey(_ + _)
+   * }}}
+   *
+   * , which returns an RDD[T, Long] instead of a map.
+   */
+  def countByValue()(implicit ord: Ordering[T] = null): Map[T, Long] = withScope {
+    map(value => (value, null)).countByKey()
+  }
+
+  /**
+   * Approximate version of countByValue().
+   *
+   * @param timeout maximum time to wait for the job, in milliseconds
+   * @param confidence the desired statistical confidence in the result
+   * @return a potentially incomplete result, with error bounds
+   */
+  def countByValueApprox(timeout: Long, confidence: Double = 0.95)
+      (implicit ord: Ordering[T] = null)
+      : PartialResult[Map[T, BoundedDouble]] = withScope {
+    require(0.0 <= confidence && confidence <= 1.0, s"confidence ($confidence) must be in [0,1]")
+    if (elementClassTag.runtimeClass.isArray) {
+      throw new SparkException("countByValueApprox() does not support arrays")
+    }
+    val countPartition: (TaskContext, Iterator[T]) => OpenHashMap[T, Long] = { (ctx, iter) =>
+      val map = new OpenHashMap[T, Long]
+      iter.foreach {
+        t => map.changeValue(t, 1L, _ + 1L)
+      }
+      map
+    }
+    val evaluator = new GroupedCountEvaluator[T](partitions.length, confidence)
+    sc.runApproximateJob(this, countPartition, evaluator, timeout)
+  }
+
+  /**
+   * Return approximate number of distinct elements in the RDD.
+   *
+   * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
+   * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
+   * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
+   *
+   * The relative accuracy is approximately `1.054 / sqrt(2^p)`. Setting a nonzero (`sp` is greater
+   * than `p`) would trigger sparse representation of registers, which may reduce the memory
+   * consumption and increase accuracy when the cardinality is small.
+   *
+   * @param p The precision value for the normal set.
+   *          `p` must be a value between 4 and `sp` if `sp` is not zero (32 max).
+   * @param sp The precision value for the sparse set, between 0 and 32.
+   *           If `sp` equals 0, the sparse representation is skipped.
+   */
+  def countApproxDistinct(p: Int, sp: Int): Long = withScope {
+    require(p >= 4, s"p ($p) must be >= 4")
+    require(sp <= 32, s"sp ($sp) must be <= 32")
+    require(sp == 0 || p <= sp, s"p ($p) cannot be greater than sp ($sp)")
+    val zeroCounter = new HyperLogLogPlus(p, sp)
+    aggregate(zeroCounter)(
+      (hll: HyperLogLogPlus, v: T) => {
+        hll.offer(v)
+        hll
+      },
+      (h1: HyperLogLogPlus, h2: HyperLogLogPlus) => {
+        h1.addAll(h2)
+        h1
+      }).cardinality()
+  }
+
+  /**
+   * Return approximate number of distinct elements in the RDD.
+   *
+   * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
+   * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
+   * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
+   *
+   * @param relativeSD Relative accuracy. Smaller values create counters that require more space.
+   *                   It must be greater than 0.000017.
+   */
+  def countApproxDistinct(relativeSD: Double = 0.05): Long = withScope {
+    require(relativeSD > 0.000017, s"accuracy ($relativeSD) must be greater than 0.000017")
+    val p = math.ceil(2.0 * math.log(1.054 / relativeSD) / math.log(2)).toInt
+    countApproxDistinct(if (p < 4) 4 else p, 0)
+  }
+
+```
+
+- count 的基本作用是 计算rdd中的元素个数
+  - countApprox 估算元素个数，给定一个限定时间 timeout，时间结束后直接返回结果（即使此时还未计算完成）
+    - 参数1 ： 毫秒为的限定时间
+    - 参数2 ： 希望的统计可信度
+    - 返回： 一个带有一定范围误差的结果
+    - 如果在限定时间内完成，会返回准确的结果
+    - 返回的是一个区间，意思是 最终的count值，估计在这个结果区间内，可信度为给定可信度
+    - `没有作出能反映更多细节的DEMO`
+  - countByValue
+    - 返回一个，计算每个元素分别出现的此书，返回 健值对形式 
+    ```scala
+    val rdd = sc.parallelize(Range(1,10,1))
+    val rdd2 = sc.parallelize(Range(1,10,2))
+    val rdd3 = rdd++rdd2;
+    rdd3.countByValue().foreach(println)
+    // 结果如下
+    (5,2)
+    (1,2)
+    (6,1)
+    (9,2)
+    (2,1)
+    (7,2)
+    (3,2)
+    (8,1)
+    (4,1)
+    ```
+  - countByValueApprox
+    - countByValue对应的估算版本
+  - countApproxDistinct  - 计算单一元素（不与其他重复的元素）在rdd中大概出现的次数
+    - 单一元素： 例如 List(1,2,3,4,4) 那么 1，2，3 会被这个算子计算到
+    - 有两个重载
+      - 提供两个精度值的版本
+        - 参数1 p， 普通set的精度值，介于 4 和参数2之间（如果参数2不为0）
+        - 参数2 sp，稀疏set的精度值，在0～32 之间。如果sp为0，会跳过 稀疏表示
+      - 提供 一个相对精度
+    - 这两者对应数学上不同的算法，暂时没有深入研究
+    ```scala
+        val rdd = sc.parallelize(Range(1,1000))
+    val x =rdd.countApproxDistinct(0.1)
+    val y = rdd.countApproxDistinct(0.2)
+    val z = rdd.countApproxDistinct(0.6)
+    val num = rdd.countApproxDistinct(1)
+    val num2 = rdd.countApproxDistinct(100)
+
+    println(x) //1194
+    println(y) //1476
+    println(z) //1213
+    println(num) //1213
+    println(num2) //1213
+    ```
+    - 测试了其中第二个版本，但是测试量很小，当前例子，在给定参数比较小的时候，可以得到较为精确的值（0.01时为1000）
