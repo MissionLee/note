@@ -15,16 +15,16 @@
   - bin/kafka-server-start.sh config/server.properties
 
 - 创建一个topic，并且指定zookeeper
-  - bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic dblab
+  - bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic missionlee
 
 - 查看当前由那些 topic
   - bin/kafka-topics.sh --list --zookeeper localhost:2181 
 
 - 创建指定topic的一个 producer
-  - bin/kafka-console-producer.sh --broker-list localhost:9092 --topic dblab
+  - bin/kafka-console-producer.sh --broker-list localhost:9092 --topic missionlee
 
 - 创建指定topic的一个 consumer
-  - bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic dblab --from-beginning  
+  - bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic missionlee --from-beginning  
 
 # 一个简单的示例程序
 ```scala
