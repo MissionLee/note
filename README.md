@@ -8,9 +8,13 @@ My note in Chinese / 我的中文笔记
 - 主要内容包括
 
   - 数据仓库建设
+  
   - 以Hadoop - Spark 为基础的ETL 与 数据分析
+  
   - 以Spark（kafka） 为基础的 流处理（实时推荐，实时计算）
+  
   - 大数据技术/理论部分
+  
     - 数据建模（数据仓库-主要内容）
     - Hadoop
     - Spark（主要内容）
@@ -18,7 +22,9 @@ My note in Chinese / 我的中文笔记
     - hbasse
     - kafka
     - 其他
+    
  - 基础部分
+ 
     - Java
     - Scala
   - Server部分
