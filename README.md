@@ -1,5 +1,4 @@
-# note[请移步 NewNote仓库|Please go to newnote]
-My note in Chinese / 我的中文笔记
+# note 此处已经废弃，新开内容转存私有
 
 - 此处记录我在各个阶段的笔记心得，更新频率不固定，更新时间与文章实际书写时间不保证对应
 
